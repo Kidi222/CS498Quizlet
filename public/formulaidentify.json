@@ -1,0 +1,278 @@
+{
+    "easy": [
+        {
+            "prompt": "What formula calculates the present value of a single payment?",
+            "choices": [
+                "$$PV = FV \\cdot (1+i)^{-n}$$",
+                "$$FV = PV \\cdot (1+i)^n$$",
+                "$$PV = PMT \\cdot a_{\\overline{n}|}$$"
+            ],
+            "correct": 0
+        },
+        {
+            "prompt": "What formula calculates the future value of a single payment?",
+            "choices": [
+                "$$FV = PV \\cdot (1+i)^n$$",
+                "$$PV = FV \\cdot (1+i)^{-n}$$",
+                "$$FV = PMT \\cdot s_{\\overline{n}|}$$"
+            ],
+            "correct": 0
+        },
+        {
+            "prompt": "Which formula is used to calculate simple interest?",
+            "choices": [
+                "$$I = P \\cdot r \\cdot t$$",
+                "$$I = P \\cdot (1+r)^t - P$$",
+                "$$I = P \\cdot e^{r \\cdot t} - P$$"
+            ],
+            "correct": 0
+        },
+        {
+            "prompt": "What formula calculates the effective annual interest rate?",
+            "choices": [
+                "$$i = \\left(1+\\frac{r}{m}\\right)^m - 1$$",
+                "$$i = \\frac{r}{m}$$",
+                "$$i = e^r - 1$$"
+            ],
+            "correct": 0
+        },
+        {
+            "prompt": "Which formula represents the discount factor?",
+            "choices": [
+                "$$v^n = (1+i)^{-n}$$",
+                "$$v^n = (1+i)^n$$",
+                "$$v^n = e^{\\delta n}$$"
+            ],
+            "correct": 0
+        },
+        {
+            "prompt": "What formula calculates the present value of a perpetuity?",
+            "choices": [
+                "$$PV = \\frac{PMT}{i}$$",
+                "$$PV = PMT \\cdot a_{\\overline{\\infty}|}$$",
+                "$$PV = PMT \\cdot \\frac{1-v^n}{i}$$"
+            ],
+            "correct": 0
+        },
+        {
+            "prompt": "Which formula is used to calculate loan payments?",
+            "choices": [
+                "$$PMT = PV \\cdot \\frac{i}{1-(1+i)^{-n}}$$",
+                "$$PMT = PV \\cdot \\frac{i}{(1+i)^n-1}$$",
+                "$$PMT = FV \\cdot \\frac{i}{1-(1+i)^{-n}}$$"
+            ],
+            "correct": 0
+        },
+        {
+            "prompt": "What formula calculates the accumulated value of an annuity-immediate?",
+            "choices": [
+                "$$s_{\\overline{n}|} = \\frac{(1+i)^n - 1}{i}$$",
+                "$$a_{\\overline{n}|} = \\frac{1-(1+i)^{-n}}{i}$$",
+                "$$s_{\\overline{n}|} = \\frac{(1+i)^n}{i}$$"
+            ],
+            "correct": 0
+        },
+        {
+            "prompt": "Which formula represents the present value of an annuity-immediate?",
+            "choices": [
+                "$$a_{\\overline{n}|} = \\frac{1-(1+i)^{-n}}{i}$$",
+                "$$s_{\\overline{n}|} = \\frac{(1+i)^n - 1}{i}$$",
+                "$$\\ddot a_{\\overline{n}|} = \\frac{1-(1+i)^{-n}}{d}$$"
+            ],
+            "correct": 0
+        },
+        {
+            "prompt": "What formula calculates the present value of an annuity-due?",
+            "choices": [
+                "$$\\ddot a_{\\overline{n}|} = (1+i) \\cdot a_{\\overline{n}|} = \\frac{1-(1+i)^{-n}}{d}$$",
+                "$$a_{\\overline{n}|} = \\frac{1-(1+i)^{-n}}{i}$$",
+                "$$\\ddot s_{\\overline{n}|} = (1+i) \\cdot s_{\\overline{n}|}$$"
+            ],
+            "correct": 0
+        }
+    ],
+    "medium": [
+        {
+            "prompt": "A loan of 50,000 must be repaid over 5 years with monthly payments at 6% nominal convertible monthly. Which formula computes the payment?",
+            "choices": [
+                "$$PMT = 50000 \\cdot \\frac{0.06}{12(1-(1+0.06/12)^{-60})}$$",
+                "$$PMT=50000\\cdot\\frac{1-v^{60}}{i}$$",
+                "$$X=50000\\frac{(1+i)^{60}-1}{i}$$"
+            ],
+            "correct": 0
+        },
+        {
+            "prompt":"What formula is used for the present value of a continuous annuity of 1 for n periods at force δ?",
+            "choices":[
+                "$$\\bar a_{\\overline{n}|}=\\frac{1-v^n}{\\delta}$$",
+                "$$a_{\\overline{n}|}=\\frac{1-v^n}{i}$$",
+                "$$\\ddot a_{\\overline{n}|}=\\frac{1-v^n}{d}$$"
+            ],
+            "correct":0
+        },
+        {
+            "prompt": "An investor wants to immunize a portfolio against interest rate changes. Which formula measures the sensitivity to interest rate changes?",
+            "choices": [
+                "$$D = \\frac{\\sum t \\cdot CF_t \\cdot v^t}{P}$$",
+                "$$P = \\sum CF_t \\cdot v^t$$",
+                "$$\\bar a_{\\overline{n}|} = \\frac{1-v^n}{\\delta}$$"
+            ],
+            "correct":0
+        },
+        {
+            "prompt": "A bond with face value $1000 pays 5% annual coupons and matures in 10 years. The yield to maturity is 6%. Which formula calculates the bond price?",
+            "choices": [
+                "$$P = 50 \\cdot a_{\\overline{10}|} + 1000v^{10}$$",
+                "$$P = 1000 \\cdot (1.06)^{-10}$$",
+                "$$P = 50 \\cdot s_{\\overline{10}|} + 1000$$"
+            ],
+            "correct":0
+        },
+        {
+            "prompt": "To calculate the present value of a call option using Black-Scholes, which formula is used?",
+            "choices": [
+                "$$C(S_0,t) = S_0 N(d_1) - Ke^{-rT} N(d_2)$$",
+                "$$P = Ke^{-rT} N(-d_2) - S_0 N(-d_1)$$",
+                "$$\\text{Payoff} = \\max(S_T - K, 0)$$"
+            ],
+            "correct":0
+        },
+        {
+            "prompt": "A perpetuity pays $100 annually. The annual effective interest rate is 5%. What formula calculates its present value?",
+            "choices": [
+                "$$PV = \\frac{100}{0.05}$$",
+                "$$PV = 100 \\cdot a_{\\overline{\\infty}|}$$",
+                "$$PV = 100 \\cdot \\frac{1}{i}$$"
+            ],
+            "correct":0
+        },
+        {
+            "prompt": "What formula relates forward rates to spot rates?",
+            "choices": [
+                "$$(1+f_{t,T})^{T-t} = \\frac{(1+s_T)^T}{(1+s_t)^t}$$",
+                "$$s_T = \\frac{(1+f_{t,T})^{T-t}}{(1+s_t)^t}$$",
+                "$$f_{t,T} = \\frac{s_T - s_t}{T-t}$$"
+            ],
+            "correct":0
+        },
+        {
+            "prompt": "Which formula calculates the modified duration?",
+            "choices": [
+                "$$D_{mod} = \\frac{D}{1+i}$$",
+                "$$D_{mod} = -\\frac{1}{P} \\cdot \\frac{dP}{di}$$",
+                "$$D_{mod} = D \\cdot (1+i)$$"
+            ],
+            "correct": 0
+        },
+        {
+            "prompt": "What formula calculates the convexity of a bond?",
+            "choices": [
+                "$$C = \\frac{1}{P} \\cdot \\frac{d^2P}{di^2}$$",
+                "$$C = \\frac{\\sum_{t=1}^{n} t(t+1)CF_t v^{t+2}}{P}$$",
+                "$$C = -\\frac{D_{mod}}{1+i}$$"
+            ],
+            "correct": 0
+        },
+        {
+            "prompt": "Which formula is used to price a bond using spot rates?",
+            "choices": [
+                "$$P = \\sum_{t=1}^{n} CF_t \\cdot (1+s_t)^{-t}$$",
+                "$$P = \\sum_{t=1}^{n} CF_t \\cdot (1+y)^{-t}$$",
+                "$$P = Fr \\cdot a_{\\overline{n}|} + C \\cdot v^n$$"
+            ],
+            "correct": 0
+        }
+    ],
+    "hard": [
+        {
+            "prompt": "In the Black-Scholes model, which formula calculates the value of d₁ for a European call option?",
+            "choices": [
+                "$$d_1 = \\frac{\\ln(S_0/K) + (r + \\sigma^2/2)T}{\\sigma \\sqrt{T}}$$",
+                "$$d_1 = \\frac{\\ln(S_0/K) + (r - \\sigma^2/2)T}{\\sigma \\sqrt{T}}$$",
+                "$$d_1 = \\frac{\\ln(K/S_0) + (r + \\sigma^2/2)T}{\\sigma \\sqrt{T}}$$"
+            ],
+            "correct": 0
+        },
+        {
+            "prompt": "Which formula represents Put-Call Parity for European options?",
+            "choices": [
+                "$$C - P = S_0 - Ke^{-rT}$$",
+                "$$C - P = S_0 - K$$",
+                "$$C - P = Ke^{-rT} - S_0$$"
+            ],
+            "correct": 0
+        },
+        {
+            "prompt": "For Redington immunization, which conditions must be met?",
+            "choices": [
+                "$$PV(Assets) = PV(Liabilities), D(Assets) = D(Liabilities), C(Assets) > C(Liabilities)$$",
+                "$$PV(Assets) = PV(Liabilities), D(Assets) > D(Liabilities), C(Assets) = C(Liabilities)$$",
+                "$$PV(Assets) > PV(Liabilities), D(Assets) = D(Liabilities), C(Assets) = C(Liabilities)$$"
+            ],
+            "correct": 0
+        },
+        {
+            "prompt": "Which formula calculates the delta of a European call option in the Black-Scholes model?",
+            "choices": [
+                "$$\\Delta = N(d_1)$$",
+                "$$\\Delta = N(d_2)$$",
+                "$$\\Delta = S_0 N(d_1) - Ke^{-rT} N(d_2)$$"
+            ],
+            "correct": 0
+        },
+        {
+            "prompt": "For a callable bond, which formula relates the callable bond price to the option-free bond price and the call option value?",
+            "choices": [
+                "$$P_{callable} = P_{option-free} - C$$",
+                "$$P_{callable} = P_{option-free} + C$$",
+                "$$P_{callable} = \\frac{P_{option-free}}{1+C}$$"
+            ],
+            "correct": 0
+        },
+        {
+            "prompt": "Which formula calculates the minimum variance hedge ratio?",
+            "choices": [
+                "$$h = \\rho \\frac{\\sigma_S}{\\sigma_F}$$",
+                "$$h = \\rho \\frac{\\sigma_F}{\\sigma_S}$$",
+                "$$h = \\frac{\\sigma_S}{\\sigma_F}$$"
+            ],
+            "correct": 0
+        },
+        {
+            "prompt": "In the Vasicek interest rate model, which formula represents the short-term interest rate process?",
+            "choices": [
+                "$$dr_t = a(b - r_t)dt + \\sigma dW_t$$",
+                "$$dr_t = abdt + \\sigma dW_t$$",
+                "$$dr_t = a(r_t - b)dt + \\sigma dW_t$$"
+            ],
+            "correct": 0
+        },
+        {
+            "prompt": "Which formula calculates the duration of a portfolio?",
+            "choices": [
+                "$$D_{portfolio} = \\sum_{i=1}^{n} w_i D_i$$",
+                "$$D_{portfolio} = \\frac{\\sum_{i=1}^{n} w_i D_i}{n}$$",
+                "$$D_{portfolio} = \\frac{\\sum_{i=1}^{n} D_i}{n}$$"
+            ],
+            "correct": 0
+        },
+        {
+            "prompt": "For a convertible bond, which formula relates the convertible bond price to the value as a bond and the conversion option?",
+            "choices": [
+                "$$P_{conv} \\geq \\max(P_{bond}, P_{conversion})$$",
+                "$$P_{conv} = \\max(P_{bond}, P_{conversion})$$",
+                "$$P_{conv} = P_{bond} + P_{conversion}$$"
+            ],
+            "correct": 0
+        },
+        {
+            "prompt": "Which formula calculates the present value of a continuously paying perpetuity?",
+            "choices": [
+                "$$\\bar a_{\\overline{\\infty}|} = \\frac{1}{\\delta}$$",
+                "$$a_{\\overline{\\infty}|} = \\frac{1}{i}$$",
+                "$$\\bar a_{\\overline{n}|} = \\frac{1-e^{-\\delta n}}{\\delta}$$"
+            ],
+            "correct": 0
+        }
+    ]
+}

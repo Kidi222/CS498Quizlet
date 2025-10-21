@@ -1,0 +1,755 @@
+{
+  "easy": [
+    {
+      "scenario": "Calculate the present value of a single payment.",
+      "steps": [
+        "Calculate PV = FV / (1+i)^n",
+        "Identify the future value (FV)",
+        "Identify the interest rate (i) and time period (n)"
+      ],
+      "correct": [1, 2, 0]
+    },
+    {
+      "scenario": "Calculate the future value of a single payment.",
+      "steps": [
+        "Identify the interest rate (i) and time period (n)",
+        "Calculate FV = PV * (1+i)^n",
+        "Identify the present value (PV)"
+      ],
+      "correct": [2, 0, 1]
+    },
+    {
+      "scenario": "Calculate the effective annual interest rate.",
+      "steps": [
+        "Identify the nominal interest rate and compounding frequency",
+        "Express as a percentage if needed",
+        "Use the formula: i = (1 + r/m)^m - 1"
+      ],
+      "correct": [0, 2, 1]
+    },
+    {
+      "scenario": "Calculate simple interest.",
+      "steps": [
+        "Identify the interest rate (r) and time period (t)",
+        "Calculate Interest = P * r * t",
+        "Identify principal amount (P)"
+      ],
+      "correct": [2, 0, 1]
+    },
+    {
+      "scenario": "Calculate the accumulated value of an annuity.",
+      "steps": [
+        "Calculate s angle n = PMT * [(1+i)^n - 1] / i",
+        "Identify the periodic payment (PMT)",
+        "Identify the interest rate (i) and number of periods (n)"
+      ],
+      "correct": [1, 2, 0]
+    },
+    {
+      "scenario": "Calculate the present value of an annuity.",
+      "steps": [
+        "Identify the interest rate (i) and number of periods (n)",
+        "Calculate a angle n = PMT * [1 - (1+i)^(-n)] / i",
+        "Identify the periodic payment (PMT)"
+      ],
+      "correct": [2, 0, 1]
+    },
+    {
+      "scenario": "Calculate loan payments for an amortized loan.",
+      "steps": [
+        "Identify the loan amount (L)",
+        "Calculate PMT = L * i / [1 - (1+i)^(-n)]",
+        "Identify the interest rate (i) and number of payments (n)"
+      ],
+      "correct": [0, 2, 1]
+    },
+    {
+      "scenario": "Calculate the present value of a perpetuity.",
+      "steps": [
+        "Identify the interest rate per period (i)",
+        "Identify the periodic payment (PMT)",
+        "Calculate PV = PMT / i"
+      ],
+      "correct": [1, 0, 2]
+    },
+    {
+      "scenario": "Calculate the accumulated value of an annuity due.",
+      "steps": [
+        "Identify the periodic payment (PMT)",
+        "Calculate s double dot angle n = PMT * [(1+i)^n - 1] / d",
+        "Identify the interest rate (i) and number of periods (n)"
+      ],
+      "correct": [0, 2, 1]
+    },
+    {
+      "scenario": "Calculate the interest portion of a loan payment.",
+      "steps": [
+        "Calculate the outstanding balance from the previous period (B t-1)",
+        "Calculate Interest = B t-1 * i",
+        "Identify the effective interest rate per period (i)"
+      ],
+      "correct": [2, 0, 1]
+    },
+    {
+      "scenario": "Calculate the principal repaid portion of a loan payment.",
+      "steps": [
+        "Calculate the interest portion of the payment",
+        "Subtract the interest from the total payment amount",
+        "Identify the level payment amount (PMT) and interest rate (i)"
+      ],
+      "correct": [2, 0, 1]
+    },
+    {
+      "scenario": "Convert a nominal rate of interest to a force of interest.",
+      "steps": [
+        "Calculate δ = m * ln(1 + i^(m)/m)",
+        "Identify the nominal rate i^(m) and compounding frequency m",
+        "Ensure the resulting δ is an annualized force of interest"
+      ],
+      "correct": [1, 0, 2]
+    },
+    {
+      "scenario": "Calculate the real rate of interest.",
+      "steps": [
+        "Calculate i_real = (i - r) / (1 + r)",
+        "Identify the nominal interest rate (i)",
+        "Identify the rate of inflation (r)"
+      ],
+      "correct": [1, 2, 0]
+    },
+    {
+      "scenario": "Set up an equation of value for a series of cash flows.",
+      "steps": [
+        "Set the present value of inflows equal to the present value of outflows",
+        "Identify all payments and the time at which they occur",
+        "Choose a comparison date and discount or accumulate all payments to that date"
+      ],
+      "correct": [1, 2, 0]
+    }
+  ],
+  "medium": [
+    {
+      "scenario": "Calculate the yield to maturity of a bond.",
+      "steps": [
+        "Solve for yield to maturity (y) using trial and error or a financial calculator",
+        "Identify the bond's purchase price, coupon payments, face value, and time to maturity",
+        "Set up the equation: Price = Σ [Coupon / (1+y)^t] + Face / (1+y)^n"
+      ],
+      "correct": [1, 2, 0]
+    },
+    {
+      "scenario": "Calculate the Macaulay duration of a cash flow stream.",
+      "steps": [
+        "Multiply the present value of each cash flow by its timing (t*PV)",
+        "Divide the sum of the weighted present values by the total present value (price)",
+        "Calculate the present value of each cash flow",
+        "Identify the timing and amount of each cash flow"
+      ],
+      "correct": [3, 2, 0, 1]
+    },
+    {
+      "scenario": "Calculate the modified duration of a bond.",
+      "steps": [
+        "Identify the yield to maturity (y)",
+        "Calculate modified duration: D_mod = D_mac / (1+y)",
+        "First, calculate the Macaulay duration (D_mac)"
+      ],
+      "correct": [2, 0, 1]
+    },
+    {
+      "scenario": "Approximate the price change of a bond using modified duration.",
+      "steps": [
+        "Calculate price change: ΔP ≈ -P * D_mod * Δy",
+        "Identify the change in yield (Δy)",
+        "Calculate the bond's modified duration (D_mod) and its current price (P)"
+      ],
+      "correct": [2, 1, 0]
+    },
+    {
+      "scenario": "Calculate the present value of a growing perpetuity.",
+      "steps": [
+        "Identify the first payment (C₁), growth rate (g), and discount rate (r)",
+        "Calculate PV = C₁ / (r - g)",
+        "Verify that the discount rate is greater than the growth rate (r > g)"
+      ],
+      "correct": [0, 2, 1]
+    },
+    {
+      "scenario": "Calculate the present value of an arithmetically increasing annuity.",
+      "steps": [
+        "Use the formula PV = P*a_angle_n + Q*((a_angle_n - n*v^n)/i)",
+        "Identify the initial payment (P), the increment (Q), interest rate (i), and term (n)",
+        "Calculate the necessary annuity and discount factors (a_angle_n, v^n)"
+      ],
+      "correct": [1, 2, 0]
+    },
+    {
+      "scenario": "Calculate the outstanding loan balance using the prospective method.",
+      "steps": [
+        "Identify the number of remaining payments and the interest rate",
+        "Calculate the present value of all remaining future payments",
+        "Ensure the interest rate used matches the payment frequency"
+      ],
+      "correct": [0, 1, 2]
+    },
+    {
+      "scenario": "Calculate the final balloon payment of a loan.",
+      "steps": [
+        "Calculate the outstanding balance just after the second-to-last payment is made",
+        "Identify the original loan terms (amount, rate, payment)",
+        "Accumulate this balance forward by one period's worth of interest"
+      ],
+      "correct": [1, 0, 2]
+    },
+    {
+      "scenario": "Calculate the amount of premium amortized in a bond's coupon payment.",
+      "steps": [
+        "Calculate the interest-due portion (Book Value at start of period × yield rate)",
+        "Calculate the difference: Amortization = Coupon Payment - Interest Due",
+        "Identify the coupon payment, yield rate, and the book value at the start of the period"
+      ],
+      "correct": [2, 0, 1]
+    },
+    {
+      "scenario": "Calculate the price of a callable bond to guarantee a minimum yield.",
+      "steps": [
+        "Calculate the lowest of all computed prices, which is the correct price to pay",
+        "For each possible call date, calculate the price of the bond assuming it's called on that date",
+        "Identify the bond's coupon rate, face value, all call dates/prices, and the desired minimum yield"
+      ],
+      "correct": [2, 1, 0]
+    },
+    {
+      "scenario": "Calculate the dollar-weighted rate of return.",
+      "steps": [
+        "Set up the equation of value: Beginning Balance + Deposits - Withdrawals = Ending Balance",
+        "Approximate each cash flow's interest earned using a simple interest assumption",
+        "Solve for the interest rate (i)"
+      ],
+      "correct": [0, 1, 2]
+    },
+    {
+      "scenario": "Calculate a forward interest rate from given spot rates.",
+      "steps": [
+        "Use the formula (1+s_T)^T = (1+s_t)^t * (1+f_{t,T-t})^(T-t)",
+        "Identify the spot rate for the shorter period (s_t) and the longer period (s_T)",
+        "Solve for the forward rate (f)"
+      ],
+      "correct": [1, 0, 2]
+    },
+    {
+      "scenario": "Calculate the present value of a cash flow stream using a spot rate curve.",
+      "steps": [
+        "Discount each cash flow using the spot rate corresponding to its timing",
+        "Sum the present values of all cash flows",
+        "Identify each cash flow amount (CF_t) and the spot rate for each time t (s_t)"
+      ],
+      "correct": [2, 0, 1]
+    }
+  ],
+
+  "hard": [
+    {
+      "scenario": "Approximate a bond's price change using both duration and convexity.",
+      "steps": [
+        "Calculate the price change contribution from convexity: (1/2) * P * C * (Δy)^2",
+        "Calculate the price change contribution from duration: -P * D_mod * Δy",
+        "Sum the two adjustments to estimate the new total price",
+        "Identify the bond's Price (P), Modified Duration (D_mod), Convexity (C), and the change in yield (Δy)"
+      ],
+      "correct": [3, 1, 0, 2]
+    },
+    {
+      "scenario": "Perform Redington immunization for a set of liabilities with a portfolio of assets.",
+      "steps": [
+        "Set the present value of assets equal to the present value of liabilities (PV_A = PV_L)",
+        "Ensure the Macaulay convexity of assets is greater than the Macaulay convexity of liabilities (C_A > C_L)",
+        "Set the Macaulay duration of assets equal to the Macaulay duration of liabilities (D_A = D_L)",
+        "Calculate the PV, Macaulay Duration, and Macaulay Convexity for both the liabilities and the available assets"
+      ],
+      "correct": [3, 0, 2, 1]
+    },
+    {
+      "scenario": "Construct a portfolio of two bonds to provide Redington Immunization for a single liability.",
+      "steps": [
+        "Set up a system of two equations: one matching present values, the other matching Macaulay durations",
+        "Solve the system for the market values (or weights) of the two bonds required in the asset portfolio",
+        "Calculate the PV and Macaulay Duration of the liability and the two available bonds",
+        "Verify that the convexity of the resulting asset portfolio is greater than the liability's convexity"
+      ],
+      "correct": [2, 0, 1, 3]
+    },
+    {
+      "scenario": "Perform full immunization of a single liability cash flow using two zero-coupon bonds.",
+      "steps": [
+        "Set the present value of the two bonds equal to the present value of the liability",
+        "Solve the system of two equations for the face values of the two bonds",
+        "Set the Macaulay duration of the two-bond portfolio equal to the timing of the liability",
+        "Choose two zero-coupon bonds, one with maturity before the liability date and one with maturity after"
+      ],
+      "correct": [3, 0, 2, 1]
+    },
+    {
+      "scenario": "Create a portfolio of bonds to exactly match a series of liability cash flows.",
+      "steps": [
+        "Purchase a quantity of the longest-maturity available bond to cover the final net liability payment",
+        "Work backwards from the final liability date, calculating the net cash outflow needed at each liability date",
+        "Use coupon payments from bonds already in the portfolio to offset earlier liability payments",
+        "Calculate the total cost of the portfolio by summing the purchase prices of all bonds"
+      ],
+      "correct": [1, 2, 0, 3]
+    },
+    {
+      "scenario": "Calculate the Macaulay convexity of a portfolio of multiple bonds.",
+      "steps": [
+        "Calculate the Macaulay convexity for each individual bond in the portfolio",
+        "Calculate the current market value (price) of each individual bond",
+        "Calculate the weighted average of the individual convexities, using the market values as weights",
+        "Sum the individual market values to find the total portfolio market value"
+      ],
+      "correct": [1, 0, 3, 2]
+    },
+    {
+      "scenario": "Calculate an unknown 3-year spot rate by bootstrapping from bond prices.",
+      "steps": [
+        "Use the price of a 1-year bond to find the 1-year spot rate, s1",
+        "Use the price of a 2-year coupon bond and s1 to find the 2-year spot rate, s2",
+        "Price the 3-year coupon bond as the sum of its cash flows discounted by s1, s2, and s3",
+        "Solve the pricing equation for the unknown 3-year spot rate, s3"
+      ],
+      "correct": [0, 1, 2, 3]
+    },
+    {
+      "scenario": "Price a callable bond to guarantee a specified minimum yield.",
+      "steps": [
+        "Calculate the price of the bond assuming it is held to maturity",
+        "Calculate the price of the bond assuming it is called at each possible call date",
+        "Identify the bond terms: coupon, face value, maturity date, call dates, and call prices",
+        "Select the lowest of all calculated prices as the correct price to pay"
+      ],
+      "correct": [2, 0, 1, 3]
+    },
+    {
+      "scenario": "Calculate the price of a coupon-paying bond using a given term structure of spot rates.",
+      "steps": [
+        "List all future cash flows from the bond (coupon payments and redemption value)",
+        "Match each cash flow with the spot rate corresponding to its time of payment",
+        "Discount each individual cash flow to time 0 using its specific spot rate",
+        "Sum the present values of all cash flows to find the bond's price"
+      ],
+      "correct": [0, 1, 2, 3]
+    },
+    {
+      "scenario": "Calculate the Macaulay duration of an arithmetically increasing perpetuity.",
+      "steps": [
+        "Calculate the present value of the perpetuity using the formula P/i + Q/i^2",
+        "Calculate the derivative of the present value with respect to the interest rate, i",
+        "Multiply the derivative by -(1+i) and divide by the present value of the perpetuity",
+        "Define the present value of the perpetuity as a function of the interest rate i"
+      ],
+      "correct": [3, 0, 1, 2]
+    },
+    {
+      "scenario": "Determine the amount to invest in two zero-coupon bonds to immunize a liability.",
+      "steps": [
+        "Set the duration of the asset portfolio equal to the duration of the liability",
+        "Set the present value of the asset portfolio equal to the present value of the liability",
+        "Solve the resulting system of two linear equations for the amounts to invest in each bond",
+        "Define the present value and duration of the asset portfolio as a weighted average of the two bonds"
+      ],
+      "correct": [3, 1, 0, 2]
+    },
+    {
+      "scenario": "Calculate the 1-year forward rate, deferred for 2 years (f_2,1), from spot rates.",
+      "steps": [
+        "Identify the 2-year spot rate (s2) and the 3-year spot rate (s3) from the yield curve",
+        "Set up the no-arbitrage equation: (1+s3)^3 = (1+s2)^2 * (1+f_2,1)^1",
+        "Isolate the forward rate term",
+        "Solve the equation for f_2,1"
+      ],
+      "correct": [0, 1, 2, 3]
+    },
+    {
+      "scenario": "Value a bond with semiannual coupons using an annually compounded yield rate.",
+      "steps": [
+        "Convert the annual effective yield rate to the equivalent semiannual effective rate",
+        "Identify the number of semiannual periods and the semiannual coupon payment",
+        "Use the standard bond pricing formula with the semiannual rate and number of periods",
+        "Calculate the present value of all coupon payments and the redemption value"
+      ],
+      "correct": [1, 0, 2, 3]
+    },
+    {
+      "scenario": "Calculate the write-down of a bond's premium during the k-th year.",
+      "steps": [
+        "Calculate the book value at the beginning of the year (end of year k-1)",
+        "Calculate the book value at the end of the year (k)",
+        "The write-down is the difference between these two book values (BV_k-1 - BV_k)",
+        "Use the bond's yield rate to recursively find book values or use the formula for principal adjustment"
+      ],
+      "correct": [3, 0, 1, 2]
+    },
+    {
+      "scenario": "Price a bond whose coupons form a geometric progression.",
+      "steps": [
+        "Discount this single sum back to time 0",
+        "Identify the first coupon, growth rate (g), yield rate (i), and term (n)",
+        "Use the growing annuity formula PV = C1 * [1 - ((1+g)/(1+i))^n] / (i-g) to find the value of the coupons at time 0",
+        "Calculate the present value of the redemption value separately"
+      ],
+      "correct": [1, 2, 3, 0]
+    },
+    {
+      "scenario": "Calculate the Macaulay duration of a common stock using the Gordon Growth Model.",
+      "steps": [
+        "Recognize the dividend stream as a growing perpetuity",
+        "The duration formula for a growing perpetuity is (1+y)/(y-g)",
+        "Identify the expected dividend (D1), stock price (P), discount rate (y), and growth rate (g)",
+        "Verify the relationship P = D1 / (y-g)"
+      ],
+      "correct": [2, 3, 0, 1]
+    },
+    {
+      "scenario": "Verify if a given portfolio of assets successfully immunizes a given liability.",
+      "steps": [
+        "Verify that PV of Assets equals PV of Liabilities",
+        "Verify that Macaulay Duration of Assets equals Macaulay Duration of Liabilities",
+        "Calculate PV, Duration, and Convexity for both the assets and liabilities",
+        "Verify that Macaulay Convexity of Assets is greater than Macaulay Convexity of Liabilities"
+      ],
+      "correct": [2, 0, 1, 3]
+    },
+    {
+      "scenario": "Calculate the outstanding balance on a loan with geometrically increasing payments.",
+      "steps": [
+        "Calculate the present value of the remaining payments using the growing annuity formula",
+        "This present value is the outstanding balance",
+        "Identify the next payment amount, the growth rate, and the number of remaining payments",
+        "Use the original loan interest rate as the discount rate"
+      ],
+      "correct": [2, 3, 0, 1]
+    },
+    {
+      "scenario": "Determine the arbitrage-free price of a Forward Rate Agreement (FRA).",
+      "steps": [
+        "Use the relationship between the two spot rates to find the implied forward rate",
+        "This implied forward rate is the arbitrage-free rate for the FRA",
+        "Identify the spot rate for the period until the FRA starts",
+        "Identify the spot rate for the period until the FRA ends"
+      ],
+      "correct": [2, 3, 0, 1]
+    },
+    {
+      "scenario": "Calculate the effective duration of a bond given price changes for yield shifts.",
+      "steps": [
+        "Identify the initial price (P0) and the size of the yield shift (Δy)",
+        "Identify the new price if yields decrease (P-minus) and increase (P-plus)",
+        "Apply the effective duration formula: (P-minus - P-plus) / (2 * P0 * Δy)",
+        "Ensure the yield shift is expressed in decimal form"
+      ],
+      "correct": [0, 1, 2, 3]
+    },
+    {
+      "scenario": "Solve for the coupon rate of a bond callable at a premium.",
+      "steps": [
+        "Determine which price is lower, which dictates the price the investor would pay",
+        "Set up the pricing equation for the bond if held to maturity, with coupon rate C as the unknown",
+        "Set up the pricing equation for the bond if called, with coupon rate C as the unknown",
+        "Solve for C in the equation corresponding to the lower price"
+      ],
+      "correct": [1, 2, 0, 3]
+    },
+    {
+      "scenario": "Calculate the cost of a dedicated portfolio to exactly cash flow match a decreasing liability stream.",
+      "steps": [
+        "Start with the last liability and buy a bond (or zero-coupon bond) maturing on that date to cover it",
+        "Move to the second-to-last liability; purchase a bond maturing on that date to cover the liability MINUS any coupons received from the first bond",
+        "Continue this process, working backward in time to the first liability",
+        "Sum the purchase prices of all bonds bought to find the total portfolio cost"
+      ],
+      "correct": [0, 1, 2, 3]
+    },
+    {
+      "scenario": "Analyze the change in surplus for an asset-liability portfolio given an interest rate shock.",
+      "steps": [
+        "Calculate the change in value for the assets: ΔA ≈ -D_A * PV_A * Δy",
+        "Calculate the change in value for the liabilities: ΔL ≈ -D_L * PV_L * Δy",
+        "Calculate the change in surplus: ΔS = ΔA - ΔL",
+        "Identify PV and Duration for both the asset and liability portfolios"
+      ],
+      "correct": [3, 0, 1, 2]
+    },
+    {
+      "scenario": "Price a putable bond.",
+      "steps": [
+        "Calculate the price of the bond assuming it is held to maturity",
+        "Calculate the price of the bond assuming it is put (sold back) at each possible put date and price",
+        "The investor will pay the highest of these calculated values",
+        "Identify the bond terms, yield, and all put dates and put prices"
+      ],
+      "correct": [3, 0, 1, 2]
+    },
+    {
+      "scenario": "Calculate the Macaulay duration of a portfolio containing a bond and a perpetuity.",
+      "steps": [
+        "Calculate the Macaulay duration of the bond",
+        "Calculate the Macaulay duration of the perpetuity",
+        "Calculate the market value (PV) of the bond and the perpetuity",
+        "Calculate the portfolio duration as the weighted average of the individual durations, weighted by market value"
+      ],
+      "correct": [2, 0, 1, 3]
+    },
+    {
+      "scenario": "Determine the final drop payment for a loan being amortized.",
+      "steps": [
+        "Calculate the number of full payments (n) required, which will not be an integer",
+        "Calculate the outstanding balance after the last full payment (floor of n)",
+        "Accumulate this balance forward by one period of interest",
+        "This accumulated balance is the final, smaller drop payment"
+      ],
+      "correct": [0, 1, 2, 3]
+    },
+    {
+      "scenario": "Calculate the effective convexity of a bond given price changes.",
+      "steps": [
+        "Identify the initial price (P0) and the yield shift (Δy)",
+        "Identify the prices for a yield decrease (P-) and increase (P+)",
+        "Apply the formula: C_eff = [P+ + P- - 2*P0] / [P0 * (Δy)^2]",
+        "This measures the curvature without assuming a flat yield curve"
+      ],
+      "correct": [0, 1, 2, 3]
+    },
+    {
+      "scenario": "Calculate the interest portion of the k-th payment for a loan with level principal repayments (sinking fund).",
+      "steps": [
+        "Calculate the outstanding balance at the start of the k-th period, which is L * (n-k+1)/n",
+        "The interest due is this balance multiplied by the interest rate",
+        "Identify the loan amount (L), term (n), and interest rate (i)",
+        "Recognize that the principal repayment each period is constant (L/n)"
+      ],
+      "correct": [3, 0, 1, 2]
+    },
+    {
+      "scenario": "Value an annuity with payments changing in arithmetic progression, using spot rates.",
+      "steps": [
+        "List each individual payment amount and its time of payment",
+        "Find the corresponding spot rate for each payment's timing from the yield curve",
+        "Discount each payment back to time 0 using its specific spot rate",
+        "Sum the individual present values to get the total value"
+      ],
+      "correct": [0, 1, 2, 3]
+    },
+    {
+      "scenario": "Determine the term of a bond given its price, coupon, redemption value, and yield.",
+      "steps": [
+        "Set up the bond pricing equation with the term 'n' as the unknown",
+        "Use a financial calculator's bond functions or time-value-of-money worksheet",
+        "Input the known values for PV, PMT, FV, and I/Y",
+        "Solve for N, the number of coupon periods"
+      ],
+      "correct": [0, 1, 2, 3]
+    },
+    {
+      "scenario": "Immunize a liability that is a geometrically decreasing perpetuity using two zero-coupon bonds.",
+      "steps": [
+        "Calculate the Present Value and Macaulay Duration of the perpetuity",
+        "Let w be the weight invested in the first bond. Set up the duration equation: D_L = w*D_A1 + (1-w)*D_A2",
+        "Solve for the weight w",
+        "Use the total PV and the weight w to find the market value to invest in each of the two bonds"
+      ],
+      "correct": [0, 1, 2, 3]
+    },
+    {
+      "scenario": "Calculate the price of a deferred, growing annuity.",
+      "steps": [
+        "Use the standard growing annuity formula to find its value one period before the first payment",
+        "This gives a value at the end of the deferral period",
+        "Discount this single sum back to time 0",
+        "Identify the first payment, growth rate, interest rate, term, and deferral period"
+      ],
+      "correct": [3, 0, 1, 2]
+    },
+    {
+      "scenario": "Solve for the yield rate of a bond purchased at a premium and callable at par.",
+      "steps": [
+        "Determine the 'worst-case' scenario for the investor, which is the earliest call date",
+        "Set up the price equation using the earliest call date as the term of the bond",
+        "The redemption value in this equation is the call price (par)",
+        "Solve for the yield rate (i) using a financial calculator"
+      ],
+      "correct": [0, 1, 2, 3]
+    },
+    {
+      "scenario": "Calculate the accumulated value of a fund with contributions and a variable force of interest δ(t).",
+      "steps": [
+        "For each contribution, calculate the accumulation factor from its deposit time to the final time T",
+        "The accumulation factor from time k to T is exp[integral from k to T of δ(t) dt]",
+        "Multiply each contribution by its respective accumulation factor",
+        "Sum the accumulated values of all contributions"
+      ],
+      "correct": [1, 2, 0, 3]
+    },
+    {
+      "scenario": "Decompose a complex annuity into simpler annuities to find its Present Value.",
+      "steps": [
+        "Identify the pattern of payments and break it into a combination of level, increasing, and/or decreasing annuities",
+        "For example, a 'hill' shaped payment stream can be an increasing annuity followed by a decreasing annuity",
+        "Calculate the present value of each component annuity, ensuring they are valued at the correct point in time",
+        "Sum the present values of all components to get the total PV"
+      ],
+      "correct": [0, 1, 2, 3]
+    },
+    {
+      "scenario": "Calculate the duration of a bond portfolio after rebalancing.",
+      "steps": [
+        "Calculate the initial market value and duration of the entire portfolio",
+        "Determine the market value of the bonds sold and the bonds purchased",
+        "Calculate the new market value of the rebalanced portfolio",
+        "Calculate the new portfolio duration as the weighted average of the remaining and newly purchased assets"
+      ],
+      "correct": [0, 1, 2, 3]
+    },
+    {
+      "scenario": "Price a bond where the coupon rate changes at a future date.",
+      "steps": [
+        "Calculate the present value of the first stream of coupons",
+        "Calculate the value of the second stream of coupons and the redemption value, valued at the changeover date",
+        "Discount this second value back to time 0",
+        "Sum the present values from the first and second calculations"
+      ],
+      "correct": [0, 1, 2, 3]
+    },
+        {
+      "scenario": "Calculate the modified convexity for a bond.",
+      "steps": [
+        "Calculate the Macaulay duration (D_mac) of the bond",
+        "Calculate the Macaulay convexity (C_mac) of the bond using the formula Σ[t(t+1)v^t * CFt] / P",
+        "Identify the bond's yield to maturity (y)",
+        "Calculate Modified Convexity: C_mod = [C_mac - D_mac] / (1+y)^2"
+      ],
+      "correct": [2, 0, 1, 3]
+    },
+    {
+      "scenario": "Determine the face amount of a serial bond given its price and yield.",
+      "steps": [
+        "Express the book value of the loan right after a payment as the PV of future payments",
+        "Recognize this is a bond where principal is repaid in level installments, so coupon payments decrease over time",
+        "Decompose the price into the PV of the level principal repayments and the PV of the decreasing interest payments",
+        "Set the price equal to the sum of these present values and solve for the total face amount"
+      ],
+      "correct": [1, 2, 0, 3]
+    },
+    {
+      "scenario": "Calculate the time-weighted rate of return over multiple periods with deposits.",
+      "steps": [
+        "For each sub-period between cash flows, calculate the growth factor: (Ending Market Value) / (Beginning Market Value)",
+        "Chain-link the growth factors by multiplying them together: (1+i) = HPR1 * HPR2 * ...",
+        "Solve for the overall rate of return, i",
+        "Identify all cash flow dates and market values just before each cash flow"
+      ],
+      "correct": [3, 0, 1, 2]
+    },
+    {
+      "scenario": "Analyze the profit on a short sale of a bond with reinvested collateral.",
+      "steps": [
+        "Calculate the accumulated value of the proceeds from the short sale, reinvested at a given rate",
+        "Calculate the accumulated value of liabilities: the bond's coupon payments (reinvested) plus the cost to repurchase the bond at maturity",
+        "The profit is the accumulated value of assets minus the accumulated value of liabilities",
+        "Identify the short sale price, collateral interest rate, bond coupon rate, and reinvestment rate"
+      ],
+      "correct": [3, 0, 1, 2]
+    },
+    {
+      "scenario": "Solve for an unknown interest rate in a complex equation of value.",
+      "steps": [
+        "Formulate the equation of value by setting the PV of outflows equal to the PV of inflows",
+        "Simplify the equation as much as possible algebraically",
+        "The equation will likely be a polynomial in v=(1+i)^-1 or i",
+        "Use a financial calculator's IRR/CASH function or trial and error (interpolation) to solve for i"
+      ],
+      "correct": [0, 1, 2, 3]
+    },
+    {
+      "scenario": "Calculate the duration of a portfolio that is exactly cash-flow matched to liabilities.",
+      "steps": [
+        "Since the portfolio is exactly cash-flow matched, its cash flows are identical to the liabilities' cash flows",
+        "Therefore, the portfolio's present value is identical to the liabilities' present value",
+        "It follows that the portfolio's duration must be identical to the liabilities' duration",
+        "Calculate the Macaulay duration of the liability stream, which will be the answer"
+      ],
+      "correct": [0, 1, 2, 3]
+    },
+    {
+      "scenario": "Price an annuity where payments are m-thly but interest is convertible k-thly.",
+      "steps": [
+        "Find the effective interest rate over one payment period",
+        "To do this, first convert the interest convertible k-thly to an annual effective rate (EAR)",
+        "Then, convert the EAR to the effective rate for the m-thly payment period",
+        "Use this new rate in the standard annuity formula with the number of m-thly payments"
+      ],
+      "correct": [1, 2, 0, 3]
+    },
+    {
+      "scenario": "Replicating a bond's cash flows using a portfolio of zero-coupon bonds.",
+      "steps": [
+        "For each coupon payment of the bond, purchase a zero-coupon bond with a face value equal to the coupon amount, maturing on the coupon date",
+        "For the final redemption value, purchase a zero-coupon bond with that face value, maturing on the bond's maturity date",
+        "The price of the original bond is the sum of the prices of all the zero-coupon bonds purchased",
+        "Use the spot rate curve to price each of the zero-coupon bonds"
+      ],
+      "correct": [0, 1, 3, 2]
+    },
+    {
+      "scenario": "Calculate the present value of a perpetuity-due with arithmetically increasing payments.",
+      "steps": [
+        "Recognize the PV as P/i + Q/i^2 for an immediate perpetuity",
+        "For a perpetuity-due, this value is multiplied by (1+i)",
+        "The formula becomes P/d + Q/(id)",
+        "Identify the first payment (P), the increment (Q), and the interest rate (i) or discount rate (d)"
+      ],
+      "correct": [3, 0, 1, 2]
+    },
+    {
+      "scenario": "Determine the conditions on asset durations for a Full Immunization strategy.",
+      "steps": [
+        "One asset cash flow must occur before the liability is due",
+        "One asset cash flow must occur after the liability is due",
+        "The Macaulay duration of the asset portfolio must equal the timing of the single liability payment",
+        "This distribution of asset cash flows ensures that asset convexity is greater than liability convexity"
+      ],
+      "correct": [0, 1, 2, 3]
+    },
+    {
+      "scenario": "Calculate the modified duration of an annuity with continuous payments.",
+      "steps": [
+        "Find the present value of the continuous annuity using the formula (1 - v^n) / δ",
+        "Find the Macaulay duration of the continuous annuity by taking the derivative of the PV w.r.t δ",
+        "Calculate Modified Duration by dividing the Macaulay duration by (1+i)",
+        "Relate the force of interest δ to the effective rate i using δ = ln(1+i)"
+      ],
+      "correct": [0, 3, 1, 2]
+    },
+    {
+      "scenario": "Solve for the refinancing cost or benefit of a loan.",
+      "steps": [
+        "Calculate the outstanding balance of the original loan at the time of refinancing",
+        "Calculate the new payment amount required under the new interest rate for the remaining term",
+        "Compare the present value of the original remaining payments to the present value of the new remaining payments",
+        "The difference represents the cost (if positive) or benefit (if negative) of refinancing"
+      ],
+      "correct": [0, 1, 2, 3]
+    },
+    {
+      "scenario": "Determine the swap interest rate for a plain vanilla interest rate swap.",
+      "steps": [
+        "The swap rate is the rate for the fixed leg that makes its present value equal to the present value of the floating leg",
+        "The present value of the floating leg is simply the notional amount (since it re-prices to par at each period)",
+        "Therefore, set the present value of a bond with coupon rate R (the swap rate) and face value equal to the notional amount, to be equal to the notional amount",
+        "Solve for R. This means the swap rate is the rate that makes the bond price at par."
+      ],
+      "correct": [1, 2, 0, 3]
+    }
+  ]
+
+}
+

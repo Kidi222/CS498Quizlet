@@ -1,122 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-    <title>SOA Financial Mathematics – Modular Route</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600;700&display=swap" rel="stylesheet"/>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"/>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script>
-        window.MathJax = {
-            tex: { inlineMath: [['$', '$'], ['\$$', '\$$']], displayMath: [['$$', '$$'], ['\$$', '\$$']] },
-            svg: { fontCache: "global" }
-        };
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-<!---------- HOME (default route) ---------->
-<section id="home">
-    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%2300c4ff' width='65' height='65'%3E%3Cpath d='M50 5L95 25v40L50 85 5 65V25z'/%3E%3C/svg%3E" alt="logo"/>
-    <h1 style="font-weight:700;margin:.5em 0;">Choose Your Mode</h1>
-
-    <div class="option-card" data-route="flip">
-        <span class="option-icon material-symbols-rounded">flip</span>
-        <span class="option-title">Formula Flip Cards</span>
-        <span class="option-desc">Traditional front/back flashcards with SOA Financial Math formulas</span>
-    </div>
-
-    <div class="option-card" data-route="identify">
-        <span class="option-icon material-symbols-rounded">quiz</span>
-        <span class="option-title">Identify Formulas</span>
-        <span class="option-desc">Given a question, pick the correct formula to use</span>
-    </div>
-
-    <div class="option-card" data-route="order">
-        <span class="option-icon material-symbols-rounded">format_list_numbered</span>
-        <span class="option-title">Order the Steps</span>
-        <span class="option-desc">Put mixed solution steps in the correct sequence</span>
-    </div>
-</section>
-
-<!---------- FLASH GAME ----------->
-<section id="game" class="hidden">
-    <header id="gameHeader" style="text-align:center;margin-bottom:20px;">
-        <h1 id="gameTitle">Formula Flip Cards</h1>
-        <p id="gameSubtitle" class="subtitle">Press space / swipe to navigate</p>
-    </header>
-
-    <!--- Actual flashcard elements (duplicated / identical) --->
-    <div class="flashcard-container glass">
-        <div class="flashcard" id="flashCard">
-            <div class="front" id="flashFront"></div>
-            <div class="back"  id="flashBack"></div>
-        </div>
-    </div>
-
-    <div class="progress"><div id="progressBar"></div></div>
-
-    <div class="controls">
-        <button class="btn" id="btnPrev"><span class="material-symbols-rounded">chevron_left</span></button>
-        <button class="btn primary" id="btnFlip">Flip</button>
-        <button class="btn" id="btnNext"><span class="material-symbols-rounded">chevron_right</span></button>
-        <button class="btn" id="btnShuffle"><span class="material-symbols-rounded">shuffle</span></button>
-        <button class="btn" id="btnHome"><span class="material-symbols-rounded">home</span></button>
-    </div>
-    <div class="counter" id="gameCounter"></div>
-</section>
-
-<!---------- IDENTIFY ---------->
-<section id="identify" class="hidden">
-    <h2 style="margin-bottom:15px;">Identify Formula</h2>
-    <div id="identifyStartScreen">
-        <p>Select difficulty level and press Play to begin:</p>
-        <div class="difficulty-selector">
-            <button class="btn difficulty-btn" data-level="easy">Easy</button>
-            <button class="btn difficulty-btn" data-level="medium">Medium</button>
-            <button class="btn difficulty-btn" data-level="hard">Hard</button>
-        </div>
-        <button class="btn primary" id="identifyPlay" style="margin-top: 20px; display: none;">Play</button>
-    </div>
-    
-    <div id="identifyGameScreen" class="hidden">
-        <div class="score-display" id="identifyScore">Score: 0/0</div>
-        <div class="round-display" id="identifyRound">Round: 1</div>
-        <div id="identifyQuestion" class="question"></div>
-        <div id="identifyChoices" class="choices"></div>
-        <button class="btn" id="identifyBack"><span class="material-symbols-rounded">home</span> Back to Home</button>
-    </div>
-</section>
-
-<!---------- ORDER ---------->
-<section id="order" class="hidden">
-    <h2 style="margin-bottom:15px;">Place Steps in Correct Order</h2>
-    <div id="orderStartScreen">
-        <p>Select difficulty level and press Play to begin:</p>
-        <div class="difficulty-selector">
-            <button class="btn difficulty-btn" data-level="easy">Easy</button>
-            <button class="btn difficulty-btn" data-level="medium">Medium</button>
-            <button class="btn difficulty-btn" data-level="hard">Hard</button>
-        </div>
-        <button class="btn primary" id="orderPlay" style="margin-top: 20px; display: none;">Play</button>
-    </div>
-    
-    <div id="orderGameScreen" class="hidden">
-        <div class="score-display" id="orderScore">Score: 0/0</div>
-        <div class="round-display" id="orderRound">Round: 1</div>
-        <div id="orderScenario" class="question"></div>
-        <ol id="orderSteps"></ol>
-        <div id="orderMsg"></div>
-        <button class="btn primary" id="orderCheck">Check Order</button>
-        <button class="btn primary hidden" id="orderNext">Next Question</button>
-        <button class="btn" id="orderBack"><span class="material-symbols-rounded">home</span> Back to Home</button>
-    </div>
-</section>
-
-<script type="module">
 /* ---------- router helpers ---------- */
 const routes = {home: '#home', flip:'#game', identify:'#identify', order:'#order'};
 function show(screen){
@@ -355,11 +236,6 @@ async function init() {
             return;
         }
         
-        // Reset buttons
-        document.getElementById('orderCheck').classList.remove('hidden');
-        document.getElementById('orderNext').classList.add('hidden');
-        document.getElementById('orderMsg').textContent = '';
-        
         const q = orderQuestions[currentOrderQuestionIndex];
         document.getElementById('orderScore').textContent = `Score: ${orderScore}/${orderQuestions.length}`;
         document.getElementById('orderRound').textContent = `Question: ${currentOrderQuestionIndex + 1}/${orderQuestions.length}`;
@@ -367,6 +243,7 @@ async function init() {
         
         const list = document.getElementById('orderSteps');
         list.innerHTML = '';
+        document.getElementById('orderMsg').textContent = '';
         
         const shuffledSteps = [...q.steps];
         shuffleArray(shuffledSteps);
@@ -440,50 +317,16 @@ async function init() {
             document.getElementById('orderMsg').textContent = '✅ Correct!';
             document.getElementById('orderMsg').style.color = '#22c55e';
             orderScore++;
-            // Show next button
-            document.getElementById('orderCheck').classList.add('hidden');
-            document.getElementById('orderNext').classList.remove('hidden');
         } else {
-            document.getElementById('orderMsg').textContent = '❌ Incorrect. Correct order:';
+            document.getElementById('orderMsg').textContent = '❌ Try again next time';
             document.getElementById('orderMsg').style.color = '#ef4444';
-            
-            // Disable dragging
-            list.querySelectorAll('.step').forEach(step => {
-                step.draggable = false;
-                step.style.cursor = 'default';
-            });
-            
-            // Show correct order after a delay
-            setTimeout(() => {
-                // Reset list
-                list.innerHTML = '';
-                
-                // Display steps in correct order
-                currentQ.correct.forEach(index => {
-                    const li = document.createElement('li');
-                    li.className = 'step';
-                    li.textContent = currentQ.steps[index];
-                    li.style.backgroundColor = '#f0f0f0';
-                    li.style.borderLeft = '3px solid #22c55e';
-                    list.appendChild(li);
-                });
-                
-                // Show next button
-                document.getElementById('orderCheck').classList.add('hidden');
-                document.getElementById('orderNext').classList.remove('hidden');
-            }, 1500);
         }
-    });
-    
-    // Next question button
-    document.getElementById('orderNext').addEventListener('click', () => {
-        // Reset buttons
-        document.getElementById('orderCheck').classList.remove('hidden');
-        document.getElementById('orderNext').classList.add('hidden');
         
-        // Move to next question
-        currentOrderQuestionIndex++;
-        displayOrderQuestion();
+        // Move to next question after a short delay
+        setTimeout(() => {
+            currentOrderQuestionIndex++;
+            displayOrderQuestion();
+        }, 1500);
     });
     
     /* ---------- Utility functions ---------- */
@@ -500,6 +343,3 @@ async function init() {
 
 // Start the app
 init();
-</script>
-</body>
-</html>

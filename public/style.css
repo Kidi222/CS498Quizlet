@@ -1,0 +1,234 @@
+:root {
+    --bg: hsl(220, 30%, 8%);
+    --surface: rgba(255,255,255,.05);
+    --primary: #ff0000;
+    --secondary: #ff0000;
+    --text: #ffffff;
+    --muted: #a0a8bd;
+    --card-size: 340px;
+    --radius: 18px;
+    --shadow: 0 8px 24px rgba(0,0,0,.4);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+body{
+    font-family:'Poppins',sans-serif;
+    background:radial-gradient(circle at top right,#111827,#0c1118);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
+
+/* ROUTES */
+#home   { display:flex; flex-wrap:wrap; gap:30px; justify-content:center; align-items:center; text-align:center; }
+#game   { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.hidden{ display:none!important; }
+
+/* HOME CARDS */
+.option-card{
+    width:250px;
+    padding:40px 25px;
+    border-radius:var(--radius);
+    background:var(--surface);
+    backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow:var(--shadow);
+    cursor:pointer;
+    transition:.3s;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+}
+
+.option-card:hover{
+    transform:translateY(-8px);
+    box-shadow:0 12px 28px rgba(0,0,0,.5);
+}
+
+.option-icon{
+    font-size:42px;
+    color:var(--primary);
+}
+
+.option-title{
+    font-weight:600;
+    font-size:1.1rem;
+}
+
+.option-desc{
+    font-size:.8rem;
+    color:var(--muted);
+    max-width:200px;
+}
+
+/* FLASHCARD styling kept the same */
+.glass{
+    background:var(--surface);
+    backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius: var(--radius);
+    box-shadow:var(--shadow);
+}
+
+.flashcard-container{
+    position:relative;
+    width:var(--card-size);
+    height:var(--card-size);
+    perspective:1000px;
+    margin-bottom:35px;
+}
+
+.flashcard{
+    position:absolute;
+    inset:0;
+    border-radius:var(--radius);
+    transform-style:preserve-3d;
+    transition:transform .6s ease;
+    cursor:pointer;
+}
+
+.flashcard.flipped{transform:rotateY(180deg);}
+
+.front,.back{
+    position:absolute;
+    inset:0;
+    backface-visibility:hidden;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    padding:25px;
+    border-radius:var(--radius);
+    background:linear-gradient(135deg,#0891b2,#0891b2);
+    color:#fff;
+    text-align:center;
+    word-wrap:break-word;
+}
+
+.back{
+    background:linear-gradient(135deg,#10b981,#0ea5e9);
+    transform:rotateY(180deg);
+}
+
+.progress,.controls,.counter{/* identical to original */}
+.progress {width:var(--card-size);height:6px;background:rgba(255,255,255,.15);border-radius:6px;margin:0 auto 25px;}
+.progress div{height:100%;background:var(--primary);transition:width .3s ease;width:0%}
+
+.controls{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:15px;}
+.btn{padding:10px 24px;font-size:.9rem;font-weight:500;border-radius:24px;border:none;cursor:pointer;color:#fff;background:var(--surface);border:1px solid rgba(255,255,255,.08);transition:.2s;display:flex;align-items:center;gap:5px;}
+.btn:hover{background:rgba(255,255,255,.1);transform:translateY(-2px);}
+.btn.primary{background:linear-gradient(90deg,#ff4400,#00ff4c);}
+#gameBack{margin-top:10px}
+/* IDENTIFY choice text white */
+#identifyChoices .choice { color:#ffffff; }
+
+/* Difficulty buttons */
+.difficulty-selector .btn { margin:4px; }
+.difficulty-selector .btn.selected {
+  background:linear-gradient(90deg,#4fc3f7,#00c4ff);
+}
+
+/* Sliding align helper */
+.d-center { display:flex; justify-content:center; gap:12px; flex-wrap:wrap; }
+
+
+/* IDENTIFY & ORDER */
+#identify,#order{max-width:500px;width:100%;display:flex;flex-direction:column;gap:20px;align-items:center;}
+.question{font-size:1rem;text-align:center;background:var(--surface);padding:20px;border-radius:var(--radius)}
+.choices{display:flex;flex-direction:column;gap:12px;width:100%;}
+.choice{
+    padding:12px 18px;
+    background:var(--surface);
+    border:1px solid rgba(255,255,255,.2);
+    border-radius:14px;
+    cursor:pointer;
+    transition:.2s;
+    text-align:center;
+    color: var(--text);
+}
+.choice:hover{background:rgba(255,255,255,.1)}
+.choice.correct{background:#22c55e}
+.choice.wrong{background:#ef4444}
+#orderSteps{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    width:100%;
+    max-height:400px;
+    overflow:auto;
+}
+.step{
+    padding:10px 14px;
+    background:var(--surface);
+    border:1px solid rgba(255,255,255,.2);
+    border-radius:12px;
+    cursor:grab;
+    transition:.2s;
+    color: var(--text);
+}
+.step.dragging{opacity:.6;transform:scale(1.05)}
+
+/* Score and round display */
+.score-display {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--primary);
+}
+
+.round-display {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 15px;
+    color: var(--secondary);
+}
+
+/* Material symbols styling fix */
+.material-symbols-rounded {
+    font-family: 'Material Symbols Rounded';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+}
+
+/* Reset button */
+.reset-btn {
+    margin-top: 15px;
+    background: #ef4444 !important;
+}
+
+/* Feedback message */
+#orderMsg {
+    margin: 10px 0;
+    font-weight: 600;
+    min-height: 1.5em;
+}
+
+/* Difficulty selector */
+.difficulty-selector {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+    justify-content: center;
+}
+
+.difficulty-btn {
+    padding: 8px 20px;
+}
+
+.difficulty-btn.selected {
+    background: var(--primary);
+}

@@ -1,0 +1,82 @@
+[
+    {
+        "front": "Effective Interest Rate",
+        "back": "$$(1+i) = \\left(1+\\frac{i^{(m)}}{m}\\right)^m$$\n\\[i = \\left(1+\\frac{i^{(m)}}{m}\\right)^m - 1\\]"
+    },
+    {
+        "front": "Continuous Compounding",
+        "back": "$$FV = PV \\cdot e^{\\delta\\,T}$$\n$$PV = FV \\cdot e^{-\\delta\\,T }$$"
+    },
+    {
+        "front": "Discount Factor",
+        "back": "$$v^n = \\frac{1}{(1+i)^n} = (1-d)^n = e^{-\\delta n}$$"
+    },
+    {
+        "front": "Force of Interest",
+        "back": "$$\\delta = \\ln(1+i)$$"
+    },
+    {
+        "front": "Present Value of Annuity-Immediate",
+        "back": "$$a_{\\overline{n}|} = \\frac{1-v^n}{i}$$"
+    },
+    {
+        "front": "PV of Annuity-Due",
+        "back": "$$\\ddot a_{\\overline{n}|} = \\frac{1-v^n}{d}$$"
+    },
+    {
+        "front": "Continuous Annuity PV",
+        "back": "$$\\bar a_{\\overline{n}|} = \\frac{1-v^n}{\\delta}$$"
+    },
+    {
+        "front": "Level Perpetuity PV",
+        "back": "$$a_{\\overline{\\infty}|} = \\frac{1}{i}$$"
+    },
+    {
+        "front": "Accumulated Value of Annuity",
+        "back": "$$s_{\\overline{n}|} = \\frac{(1+i)^n - 1}{i}$$"
+    },
+    {
+        "front": "Loan Payment Formula",
+        "back": "$$R = \\frac{L}{a_{\\overline{n}|}} = L \\cdot \\frac{i}{1-(1+i)^{-n}}$$"
+    },
+    {
+        "front": "Bond Price Formula",
+        "back": "$$P = Fr \\cdot a_{\\overline{n}|} + C \\cdot v^n$$\nWhere C is redemption value, F is face value"
+    },
+    {
+        "front": "Macaulay Duration",
+        "back": "$$D = \\frac{\\sum_{t=1}^{n} t \\cdot CF_t \\cdot v^t}{P}$$"
+    },
+    {
+        "front": "Modified Duration",
+        "back": "$$D_{mod} = \\frac{D}{1+i} = -\\frac{1}{P} \\cdot \\frac{dP}{di}$$"
+    },
+    {
+        "front": "Convexity",
+        "back": "$$C = \\frac{1}{P} \\cdot \\frac{d^2P}{di^2} = \\frac{\\sum_{t=1}^{n} t(t+1)CF_t v^{t+2}}{P}$$"
+    },
+    {
+        "front": "Spot Rate Pricing",
+        "back": "$$P = \\sum_{t=1}^{n} CF_t \\cdot (1+s_t)^{-t}$$\nWhere $s_t$ is the t-period spot rate"
+    },
+    {
+        "front": "Forward Rate Formula",
+        "back": "$$(1+f_{t,T})^{T-t} = \\frac{(1+s_T)^T}{(1+s_t)^t}$$"
+    },
+    {
+        "front": "Call Option Payoff",
+        "back": "$$\\text{Payoff} = \\max(S_T - K, 0)$$\nWhere $S_T$ is asset price at maturity, $K$ is strike price"
+    },
+    {
+        "front": "Put Option Payoff",
+        "back": "$$\\text{Payoff} = \\max(K - S_T, 0)$$"
+    },
+    {
+        "front": "Put-Call Parity",
+        "back": "$$C - P = S_0 - Ke^{-rT}$$\nFor European options on non-dividend paying stock"
+    },
+    {
+        "front": "Black-Scholes Call Formula",
+        "back": "$$C(S_0,t) = S_0 N(d_1) - Ke^{-rT} N(d_2)$$\nWhere $d_1 = \\frac{\\ln(S_0/K) + (r + \\sigma^2/2)T}{\\sigma \\sqrt{T}}$ and $d_2 = d_1 - \\sigma \\sqrt{T}$"
+    }
+]
