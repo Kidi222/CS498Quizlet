@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <title>Identify Formulas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"/>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\$$', '\$$']], displayMath: [['$$', '$$'], ['\$$', '\$$']] },
+            svg: { fontCache: "global" }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <section id="identify">
+        <h2 style="margin-bottom:15px;">Identify Formula</h2>
+        
+        <div id="identifyStartScreen">
+            <p>Select difficulty level and press Play to begin:</p>
+            <div class="difficulty-selector">
+                <button class="btn difficulty-btn" data-level="easy">Easy</button>
+                <button class="btn difficulty-btn" data-level="medium">Medium</button>
+                <button class="btn difficulty-btn" data-level="hard">Hard</button>
+            </div>
+            <button class="btn primary" id="identifyPlay" style="margin-top: 20px; display: none;">Play</button>
+        </div>
+        
+        <div id="identifyGameScreen" class="hidden">
+            <div class="score-display" id="identifyScore">Score: 0/0</div>
+            <div class="round-display" id="identifyRound">Round: 1</div>
+            <div id="identifyQuestion" class="question"></div>
+            <div id="identifyChoices" class="choices"></div>
+            <button class="btn" id="identifyBack" onclick="window.location.href='index.html'">
+                <span class="material-symbols-rounded">home</span> Back to Home
+            </button>
+        </div>
+    </section>
+
+    <script type="module">
+        let identifyDifficulty = null;
+        let identifyScore = 0;
+        let identifyRound = 1;
+        let identifyQuestions = [];
+        let currentIdentifyQuestionIndex = 0;
+        let identifyQs = {};
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        async function loadData() {
+            const response = await fetch('/data/formulaidentify.json');
+            identifyQs = await response.json();
+        }
+
+        function startIdentifyGame() {
+            identifyScore = 0;
+            identifyRound = 1;
+            identifyQuestions = [...identifyQs[identifyDifficulty]];
+            shuffleArray(identifyQuestions);
+            identifyQuestions = identifyQuestions.slice(0, 5);
+            currentIdentifyQuestionIndex = 0;
+            
+            document.getElementById('identifyStartScreen').classList.add('hidden');
+            document.getElementById('identifyGameScreen').classList.remove('hidden');
+            
+            displayIdentifyQuestion();
+        }
+
+        function displayIdentifyQuestion() {
+            if (currentIdentifyQuestionIndex >= identifyQuestions.length) {
+                if (identifyScore === identifyQuestions.length) {
+                    confetti({
+                        particleCount: 150,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                    setTimeout(() => {
+                        alert(`Perfect round! You got all ${identifyQuestions.length} correct!`);
+                        startIdentifyGame();
+                    }, 1000);
+                } else {
+                    alert(`Round completed! Score: ${identifyScore}/${identifyQuestions.length}`);
+                    startIdentifyGame();
+                }
+                return;
+            }
+            
+            const q = identifyQuestions[currentIdentifyQuestionIndex];
+            document.getElementById('identifyScore').textContent = `Score: ${identifyScore}/${identifyQuestions.length}`;
+            document.getElementById('identifyRound').textContent = `Question: ${currentIdentifyQuestionIndex + 1}/${identifyQuestions.length}`;
+            document.getElementById('identifyQuestion').innerHTML = `<div>${q.prompt}</div>`;
+            
+            const box = document.getElementById('identifyChoices');
+            box.innerHTML = '';
+            
+            const shuffledChoices = [...q.choices];
+            shuffleArray(shuffledChoices);
+            
+            shuffledChoices.forEach((choiceText) => {
+                const choiceIndex = q.choices.indexOf(choiceText);
+                const btn = document.createElement('button');
+                btn.className = 'choice';
+                btn.innerHTML = choiceText;
+                btn.onclick = function() {
+                    if (btn.classList.contains('correct') || btn.classList.contains('wrong')) return;
+                    
+                    const correct = choiceIndex === q.correct;
+                    btn.className = correct ? 'choice correct' : 'choice wrong';
+                    
+                    if (correct) identifyScore++;
+                    
+                    setTimeout(() => {
+                        currentIdentifyQuestionIndex++;
+                        displayIdentifyQuestion();
+                    }, 1200);
+                };
+                box.appendChild(btn);
+            });
+            
+            setTimeout(() => window.MathJax.typeset(), 0);
+        }
+
+        async function init() {
+            await loadData();
+            
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    identifyDifficulty = this.dataset.level;
+                    document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('selected'));
+                    this.classList.add('selected');
+                    document.getElementById('identifyPlay').style.display = 'inline-flex';
+                });
+            });
+            
+            document.getElementById('identifyPlay').addEventListener('click', startIdentifyGame);
+        }
+
+        init();
+    </script>
+</body>
+</html>
