@@ -232,3 +232,37 @@ body{
 .difficulty-btn.selected {
     background: var(--primary);
 }
+
+#manage #manageGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2em;
+}
+
+#manage #createColumn, #manage #listColumn {
+  flex: 1 1 45%;
+  min-width: 300px;
+}
+
+@media (max-width: 800px) {
+  #manage #createColumn,
+  #manage #listColumn {
+    flex: 1 1 100%;
+  }
+}
+
+.input.glass {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+  border-radius: 10px;
+  padding: 0.6em 1em;
+  width: 100%;
+  font-family: inherit;
+  margin-bottom: 0.4em;
+}
+
+.term-row textarea {
+  min-height: 60px;
+  resize: vertical;
+}

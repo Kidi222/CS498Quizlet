@@ -25,11 +25,16 @@ async function init() {
     
     /* ---------- HOME binding ---------- */
     document.querySelectorAll('[data-route]').forEach(card=>{
-        card.addEventListener('click', ()=>{
+        card.addEventListener('click', async ()=>{
             const route=card.dataset.route;
             if(route==='flip') initFlashGame(deck);
             if(route==='identify') showIdentifyStart();
             if(route==='order') showOrderStart();
+            if (route === 'manage') {
+                // Dynamically import manage.js only when needed
+                const { showManageSets } = await import('./manage.js');
+                showManageSets();
+            }
         });
     });
     
