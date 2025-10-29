@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <title>Order the Steps</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"/>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\$$', '\$$']], displayMath: [['$$', '$$'], ['\$$', '\$$']] },
+            svg: { fontCache: "global" }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <section id="order">
+        <h2 style="margin-bottom:15px;">Place Steps in Correct Order</h2>
+        
+        <div id="orderStartScreen">
+            <p>Select difficulty level and press Play to begin:</p>
+            <div class="difficulty-selector">
+                <button class="btn difficulty-btn" data-level="easy">Easy</button>
+                <button class="btn difficulty-btn" data-level="medium">Medium</button>
+                <button class="btn difficulty-btn" data-level="hard">Hard</button>
+            </div>
+            <button class="btn primary" id="orderPlay" style="margin-top: 20px; display: none;">Play</button>
+        </div>
+        
+        <div id="orderGameScreen" class="hidden">
+            <div class="score-display" id="orderScore">Score: 0/0</div>
+            <div class="round-display" id="orderRound">Round: 1</div>
+            <div id="orderScenario" class="question"></div>
+            <ol id="orderSteps"></ol>
+            <div id="orderMsg"></div>
+            <button class="btn primary" id="orderCheck">Check Order</button>
+            <button class="btn primary hidden" id="orderNext">Next Question</button>
+            <button class="btn" id="orderBack" onclick="window.location.href='index.html'">
+                <span class="material-symbols-rounded">home</span> Back to Home
+            </button>
+        </div>
+    </section>
+
+    <script type="module">
+        let orderDifficulty = null;
+        let orderScore = 0;
+        let orderRound = 1;
+        let orderQuestions = [];
+        let currentOrderQuestionIndex = 0;
+        let orderQs = {};
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        async function loadData() {
+            const response = await fetch('/data/orderquestion.json');
+            orderQs = await response.json();
+        }
+
+        function startOrderGame() {
+            orderScore = 0;
+            orderRound = 1;
+            orderQuestions = [...orderQs[orderDifficulty]];
+            shuffleArray(orderQuestions);
+            orderQuestions = orderQuestions.slice(0, 5);
+            currentOrderQuestionIndex = 0;
+            
+            document.getElementById('orderStartScreen').classList.add('hidden');
+            document.getElementById('orderGameScreen').classList.remove('hidden');
+            
+            displayOrderQuestion();
+        }
+
+        function displayOrderQuestion() {
+            if (currentOrderQuestionIndex >= orderQuestions.length) {
+                if (orderScore === orderQuestions.length) {
+                    confetti({
+                        particleCount: 150,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                    setTimeout(() => {
+                        alert(`Perfect round! You got all ${orderQuestions.length} correct!`);
+                        startOrderGame();
+                    }, 1000);
+                } else {
+                    alert(`Round completed! Score: ${orderScore}/${orderQuestions.length}`);
+                    startOrderGame();
+                }
+                return;
+            }
+            
+            document.getElementById('orderCheck').classList.remove('hidden');
+            document.getElementById('orderNext').classList.add('hidden');
+            document.getElementById('orderMsg').textContent = '';
+            
+            const q = orderQuestions[currentOrderQuestionIndex];
+            document.getElementById('orderScore').textContent = `Score: ${orderScore}/${orderQuestions.length}`;
+            document.getElementById('orderRound').textContent = `Question: ${currentOrderQuestionIndex + 1}/${orderQuestions.length}`;
+            document.getElementById('orderScenario').innerHTML = `<div>${q.scenario}</div>`;
+            
+            const list = document.getElementById('orderSteps');
+            list.innerHTML = '';
+            
+            const shuffledSteps = [...q.steps];
+            shuffleArray(shuffledSteps);
+            
+            shuffledSteps.forEach((s, i) => {
+                const li = document.createElement('li');
+                li.className = 'step';
+                li.textContent = s;
+                li.draggable = true;
+                li.setAttribute('data-index', i);
+                list.appendChild(li);
+            });
+            
+            list.querySelectorAll('.step').forEach((step) => {
+                step.addEventListener('dragstart', e => {
+                    e.dataTransfer.setData('text/plain', step.getAttribute('data-index'));
+                    step.classList.add('dragging');
+                });
+                
+                step.addEventListener('dragend', () => {
+                    step.classList.remove('dragging');
+                });
+                
+                step.addEventListener('dragover', e => {
+                    e.preventDefault();
+                });
+                
+                step.addEventListener('drop', e => {
+                    e.preventDefault();
+                    const dragIndex = e.dataTransfer.getData('text/plain');
+                    const dragElement = list.querySelector(`[data-index="${dragIndex}"]`);
+                    const targetElement = e.currentTarget;
+                    
+                    if (dragElement !== targetElement) {
+                        const rect = targetElement.getBoundingClientRect();
+                        const next = (e.clientY - rect.top) / (rect.height / 2) < 1;
+                        
+                        if (next && targetElement.parentNode) {
+                            targetElement.parentNode.insertBefore(dragElement, targetElement);
+                        } else if (targetElement.parentNode) {
+                            targetElement.parentNode.insertBefore(dragElement, targetElement.nextSibling);
+                        }
+                        
+                        list.querySelectorAll('.step').forEach((s, idx) => {
+                            s.setAttribute('data-index', idx);
+                        });
+                    }
+                });
+            });
+            
+            setTimeout(() => window.MathJax.typeset(), 0);
+        }
+
+        document.getElementById('orderCheck').addEventListener('click', () => {
+            const list = document.getElementById('orderSteps');
+            const actualOrder = [...list.children].map(li => li.textContent);
+            const currentQ = orderQuestions[currentOrderQuestionIndex];
+            
+            let isCorrect = true;
+            for (let i = 0; i < actualOrder.length; i++) {
+                if (actualOrder[i] !== currentQ.steps[currentQ.correct[i]]) {
+                    isCorrect = false;
+                    break;
+                }
+            }
+            
+            if (isCorrect) {
+                document.getElementById('orderMsg').textContent = '✅ Correct!';
+                document.getElementById('orderMsg').style.color = '#22c55e';
+                orderScore++;
+                document.getElementById('orderCheck').classList.add('hidden');
+                document.getElementById('orderNext').classList.remove('hidden');
+            } else {
+                document.getElementById('orderMsg').textContent = '❌ Incorrect. Correct order:';
+                document.getElementById('orderMsg').style.color = '#ef4444';
+                
+                list.querySelectorAll('.step').forEach(step => {
+                    step.draggable = false;
+                    step.style.cursor = 'default';
+                });
+                
+                setTimeout(() => {
+                    list.innerHTML = '';
+                    
+                    currentQ.correct.forEach(index => {
+                        const li = document.createElement('li');
+                        li.className = 'step';
+                        li.textContent = currentQ.steps[index];
+                        li.style.backgroundColor = '#f0f0f0';
+                        li.style.borderLeft = '3px solid #22c55e';
+                        list.appendChild(li);
+                    });
+                    
+                    document.getElementById('orderCheck').classList.add('hidden');
+                    document.getElementById('orderNext').classList.remove('hidden');
+                }, 1500);
+            }
+        });
+
+        document.getElementById('orderNext').addEventListener('click', () => {
+            document.getElementById('orderCheck').classList.remove('hidden');
+            document.getElementById('orderNext').classList.add('hidden');
+            
+            currentOrderQuestionIndex++;
+            displayOrderQuestion();
+        });
+
+        async function init() {
+            await loadData();
+            
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    orderDifficulty = this.dataset.level;
+                    document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('selected'));
+                    this.classList.add('selected');
+                    document.getElementById('orderPlay').style.display = 'inline-flex';
+                });
+            });
+            
+            document.getElementById('orderPlay').addEventListener('click', startOrderGame);
+        }
+
+        init();
+    </script>
+</body>
+</html>
