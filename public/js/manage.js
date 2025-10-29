@@ -1,8 +1,8 @@
 // public/js/manage.js
 // Full-featured manager with proper edit layout and working Back navigation
 
-export function showManageSets() {
-    document.querySelectorAll("section").forEach(s => s.classList.add("hidden"));
+function showManageSets() {
+    // Standalone page: don't hide sections on this page
 
     let section = document.getElementById("manage");
     if (!section) {
@@ -18,7 +18,7 @@ export function showManageSets() {
     /* ---------------- MAIN MANAGE VIEW ---------------- */
     async function renderManageView() {
         section.innerHTML = `
-            <h2 style="margin-bottom:1em;">Manage Study Sets</h2>
+            <h2 style="margin-bottom:1em; text-align:center;">Manage Study Sets</h2>
 
             <div id="manageGrid" style="display:flex; flex-wrap:wrap; gap:2em;">
                 <!-- LEFT: Create New Set -->
@@ -74,9 +74,9 @@ export function showManageSets() {
             }
         });
 
+        // Standalone page: actually navigate home
         backBtn.onclick = () => {
-            section.classList.add("hidden");
-            document.getElementById("home")?.classList.remove("hidden");
+            window.location.href = "index.html";
         };
 
         // === Load sets list ===
@@ -231,3 +231,6 @@ export function showManageSets() {
         document.getElementById("backToManage").onclick = () => renderManageView();
     }
 }
+
+// IMPORTANT: fire on page load (listener OUTSIDE the function)
+document.addEventListener("DOMContentLoaded", showManageSets);

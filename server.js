@@ -78,67 +78,87 @@ app.post('/api/flashcards', (req, res) => {
     });
 });
 
-// 404 handler
-app.use((req, res) => {
-    res.status(404).sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+// ===== Study Sets API =====
 
-// =========================================================
-//  STUDY SET ROUTES (actual JSON-file CRUD backend)
-// =========================================================
-const STUDY_SET_DIR = path.join(__dirname, "public", "studySets");
-if (!fs.existsSync(STUDY_SET_DIR)) fs.mkdirSync(STUDY_SET_DIR, { recursive: true });
+// Folder to store JSON files
+const studySetsDir = path.join(__dirname, "public", "studySets");
 
-// Helper: load all study sets
-function getAllStudySets() {
-  const files = fs.readdirSync(STUDY_SET_DIR).filter((f) => f.endsWith(".json"));
-  return files.map((file) => {
-    const data = JSON.parse(fs.readFileSync(path.join(STUDY_SET_DIR, file), "utf-8"));
-    return { id: file.replace(".json", ""), ...data };
+// Ensure folder exists
+if (!fs.existsSync(studySetsDir)) fs.mkdirSync(studySetsDir, { recursive: true });
+
+// Helper to get all study sets
+function loadAllStudySets() {
+  const files = fs.readdirSync(studySetsDir).filter(f => f.endsWith(".json"));
+  return files.map(filename => {
+    const filePath = path.join(studySetsDir, filename);
+    const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    return { id: path.parse(filename).name, ...data };
   });
 }
 
-// GET all study sets
+// === GET all study sets ===
 app.get("/api/studySets", (req, res) => {
-  res.json(getAllStudySets());
+  try {
+    const sets = loadAllStudySets();
+    res.json(sets);
+  } catch (err) {
+    console.error("Error loading study sets:", err);
+    res.status(500).json({ error: "Failed to load study sets" });
+  }
 });
 
-// CREATE new study set
+// === POST create new study set ===
 app.post("/api/studySets", (req, res) => {
-  const { title, description, cards } = req.body;
-  if (!title || !Array.isArray(cards))
-    return res.status(400).json({ error: "Missing title or cards array" });
+  try {
+    const { title, description, cards } = req.body;
+    if (!title || !cards) {
+      return res.status(400).json({ error: "Title and cards required" });
+    }
 
-  const id = title.toLowerCase().replace(/\s+/g, "_") + "_" + Date.now();
-  const filePath = path.join(STUDY_SET_DIR, `${id}.json`);
-  const newSet = { title, description, cards };
-
-  fs.writeFileSync(filePath, JSON.stringify(newSet, null, 2));
-  res.status(201).json({ message: "Study set created", id });
+    const id = Date.now().toString();
+    const filePath = path.join(studySetsDir, `${id}.json`);
+    fs.writeFileSync(filePath, JSON.stringify({ title, description, cards }, null, 2));
+    res.status(201).json({ id, message: "Study set created" });
+  } catch (err) {
+    console.error("Error creating study set:", err);
+    res.status(500).json({ error: "Failed to create study set" });
+  }
 });
 
-// EDIT existing study set
+// === PUT update study set ===
 app.put("/api/studySets/:id", (req, res) => {
-  const id = req.params.id;
-  const filePath = path.join(STUDY_SET_DIR, `${id}.json`);
-  if (!fs.existsSync(filePath))
-    return res.status(404).json({ error: "Study set not found" });
+  try {
+    const { id } = req.params;
+    const filePath = path.join(studySetsDir, `${id}.json`);
+    if (!fs.existsSync(filePath)) return res.status(404).json({ error: "Not found" });
 
-  const current = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-  const updated = { ...current, ...req.body };
-  fs.writeFileSync(filePath, JSON.stringify(updated, null, 2));
-  res.json({ message: "Study set updated" });
+    const { title, description, cards } = req.body;
+    fs.writeFileSync(filePath, JSON.stringify({ title, description, cards }, null, 2));
+    res.json({ message: "Study set updated" });
+  } catch (err) {
+    console.error("Error updating study set:", err);
+    res.status(500).json({ error: "Failed to update study set" });
+  }
 });
 
-// DELETE a study set
+// === DELETE study set ===
 app.delete("/api/studySets/:id", (req, res) => {
-  const id = req.params.id;
-  const filePath = path.join(STUDY_SET_DIR, `${id}.json`);
-  if (!fs.existsSync(filePath))
-    return res.status(404).json({ error: "Study set not found" });
+  try {
+    const { id } = req.params;
+    const filePath = path.join(studySetsDir, `${id}.json`);
+    if (!fs.existsSync(filePath)) return res.status(404).json({ error: "Not found" });
 
-  fs.unlinkSync(filePath);
-  res.json({ message: "Study set deleted" });
+    fs.unlinkSync(filePath);
+    res.json({ message: "Study set deleted" });
+  } catch (err) {
+    console.error("Error deleting study set:", err);
+    res.status(500).json({ error: "Failed to delete study set" });
+  }
+});
+
+// 404 handler
+app.use((req, res) => {
+    res.status(404).sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Start the server
