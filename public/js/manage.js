@@ -91,52 +91,50 @@ function showManageSets() {
 
             listContainer.innerHTML = sets.map(set => `
                 <div class="study-set-card glass" style="padding:1em; margin-bottom:1em; cursor:pointer;" data-id="${set.id}">
+                <div style="display:flex; justify-content:space-between; gap:1rem; align-items:start;">
+                    <div class="set-main" style="flex:1 1 auto;">
                     <h4 style="margin:0;">${set.title}</h4>
                     <p style="opacity:0.7; margin-top:4px;">${set.description}</p>
+                    </div>
+                    <div class="set-actions" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                    <button type="button" class="btn small set-active" data-id="${set.id}">Set Active</button>
+                    <button type="button" class="btn small secondary play-set" data-id="${set.id}">Play</button>
+                    </div>
+                </div>
                 </div>
             `).join("");
-        }
 
-        // === Create set ===
-        form.onsubmit = async e => {
-            e.preventDefault();
-            const title = form.title.value.trim();
-            const description = form.description.value.trim();
-            const termElems = termContainer.querySelectorAll(".term-row");
-            const cards = [...termElems].map(div => ({
-                front: div.querySelector(".term-front").value.trim(),
-                back: div.querySelector(".term-back").value.trim()
-            })).filter(c => c.front && c.back);
-
-            if (!title || cards.length === 0) {
-                alert("Please provide a title and at least one term.");
-                return;
-            }
-
-            const res = await fetch("/api/studySets", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title, description, cards })
+            // Clicking the card body still opens the editor
+            listContainer.querySelectorAll('.study-set-card .set-main').forEach(el => {
+                el.addEventListener('click', (e) => {
+                const card = e.currentTarget.closest('.study-set-card');
+                openEditPage(card.dataset.id);
+                });
             });
 
-            if (res.ok) {
-                form.reset();
-                termContainer.innerHTML = "";
-                addTermRow();
-                loadStudySets();
-            } else {
-                alert("Error creating study set.");
-            }
-        };
+            // Set Active: store in localStorage (so backend.js will use it)
+            listContainer.querySelectorAll('.set-active').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = btn.getAttribute('data-id');
+                localStorage.setItem('selectedSetId', id);
+                alert('Active set updated.');
+                });
+            });
 
-        // === Click to open editor ===
-        listContainer.onclick = e => {
-            const card = e.target.closest(".study-set-card");
-            if (!card) return;
-            openEditPage(card.dataset.id);
-        };
+            // Play: set active + navigate to Flash
+            listContainer.querySelectorAll('.play-set').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = btn.getAttribute('data-id');
+                localStorage.setItem('selectedSetId', id);
+                // Go straight to the flashcards page (which reads the active set)
+                window.location.href = 'flashcards.html';
+                });
+            });
+        }
 
-        loadStudySets();
+        loadStudySets(); // Load study sets when the page first renders
     }
 
     /* ---------------- EDIT VIEW ---------------- */

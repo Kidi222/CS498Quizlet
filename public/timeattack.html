@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Time Attack</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"/>
+  <link rel="stylesheet" href="style.css"/>
+
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$','$$']] },
+      svg: { fontCache: "global" }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+
+  <style>
+    .ta-wrap { max-width:900px; margin:40px auto; padding:24px; }
+    .timer-bar { height:10px; width:100%; background:rgba(255,255,255,0.08); border-radius:8px; overflow:hidden; margin:10px 0 6px; }
+    .timer-fill { height:100%; width:100%; background:linear-gradient(90deg,#22c55e,#16a34a); transition:width 0.1s linear; }
+    .stat-row { display:flex; gap:14px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
+    .prompt-box { min-height:96px; padding:18px; }
+    .answer-row { display:flex; gap:10px; align-items:center; margin-top:14px; flex-wrap:wrap; }
+    .answer-input { flex:1 1 380px; }
+    .ghost { opacity:.75; font-size:.95rem; }
+    .big { font-size:1.15rem; font-weight:600; }
+    .correct { border:2px solid #22c55e !important; }
+    .wrong { border:2px solid #ef4444 !important; }
+    #startScreen { text-align:center; padding:20px; }
+
+    .option-group { margin:15px 0; }
+    /* NEW: clear, visible selected state for option buttons */
+    .btn.selected {
+      outline: 2px solid #22c55e;
+      box-shadow: 0 0 0 2px rgba(34,197,94,0.2) inset;
+      filter: brightness(1.06);
+    }
+  </style>
+</head>
+<body>
+  <section id="ta" class="glass ta-wrap">
+    <header style="text-align:center;margin-bottom:14px;">
+      <h1 style="font-weight:700;">Time Attack</h1>
+      <p class="subtitle">Answer before time runs out — the clock gets faster!</p>
+    </header>
+
+    <!-- START SCREEN -->
+    <div id="startScreen">
+      <div class="option-group">
+        <h3>Choose Difficulty</h3>
+        <button class="btn difficulty-btn" data-level="easy">Easy</button>
+        <button class="btn difficulty-btn" data-level="medium">Medium</button>
+        <button class="btn difficulty-btn" data-level="hard">Hard</button>
+      </div>
+
+      <div class="option-group">
+        <h3>Choose Mode</h3>
+        <button class="btn mode-btn" data-mode="front">Front → Back</button>
+        <button class="btn mode-btn" data-mode="back">Back → Front</button>
+        <button class="btn mode-btn" data-mode="mix">Mixed</button>
+      </div>
+
+      <button class="btn primary" id="startBtn" disabled>Start Game</button>
+      <button class="btn" onclick="window.location.href='index.html'">
+        <span class="material-symbols-rounded">home</span> Back
+      </button>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="gameScreen" class="hidden">
+      <div class="stat-row">
+        <div id="taScore">Score: 0</div>
+        <div id="taBest">Best: 0</div>
+        <div id="taTime">Time: —</div>
+      </div>
+      <div class="timer-bar"><div id="taFill" class="timer-fill"></div></div>
+      <div id="taPrompt" class="glass prompt-box big"></div>
+
+      <div class="answer-row">
+        <input id="taInput" class="input glass answer-input" placeholder="Type your answer and press Enter"/>
+        <button class="btn primary" id="taSubmit">Submit</button>
+        <button class="btn" id="taSkip">Reveal</button>
+        <button class="btn" id="taHome" onclick="window.location.href='index.html'">
+          <span class="material-symbols-rounded">home</span>
+        </button>
+      </div>
+      <div id="taFeedback" class="ghost" style="min-height:22px;margin-top:8px;"></div>
+    </div>
+  </section>
+
+  <script>
+    /* ========== Load Active Deck ========== */
+    async function loadActiveDeck() {
+      const activeId = localStorage.getItem('selectedSetId');
+      if (activeId) {
+        try {
+          const res = await fetch('/api/studySets');
+          if (res.ok) {
+            const sets = await res.json();
+            const set = sets.find(s => String(s.id) === String(activeId));
+            if (set && set.cards?.length) return set.cards;
+          }
+        } catch {}
+      }
+      const fallback = await fetch('flashcard.json');
+      return await fallback.json();
+    }
+
+    /* ========== Helpers ========== */
+    function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+    function simplify(s){return String(s??'').replace(/\$+|\\\(|\\\)|\\\[|\\\]/g,'').replace(/[^\p{L}\p{N}]+/gu,'').toLowerCase();}
+
+    /* ========== Game Variables ========== */
+    const DIFFICULTY = {
+      easy:   { start:20, decay:0.5, wrong:0.5, min:4 },
+      medium: { start:15,  decay:0.5, wrong:1.0, min:3 },
+      hard:   { start:10,  decay:0.5, wrong:1.5, min:2.5 }
+    };
+
+    let deck=[], order=[], idx=0, score=0, best=0;
+    let settings={difficulty:'', mode:''};
+    let limit=7, timeLeft=7, ticking=null;
+
+    /* ========== UI Refs ========== */
+    const elStart=document.getElementById('startScreen');
+    const elGame=document.getElementById('gameScreen');
+    const elScore=document.getElementById('taScore');
+    const elBest=document.getElementById('taBest');
+    const elTime=document.getElementById('taTime');
+    const elFill=document.getElementById('taFill');
+    const elPrompt=document.getElementById('taPrompt');
+    const elInput=document.getElementById('taInput');
+    const elSubmit=document.getElementById('taSubmit');
+    const elSkip=document.getElementById('taSkip');
+    const elFeedback=document.getElementById('taFeedback');
+    const elStartBtn=document.getElementById('startBtn');
+
+    /* ========== Mode & Difficulty Selectors (with visible highlight) ========== */
+    document.querySelectorAll('.difficulty-btn').forEach(btn=>{
+      btn.onclick=()=>{
+        settings.difficulty=btn.dataset.level;
+        document.querySelectorAll('.difficulty-btn').forEach(b=>b.classList.remove('selected'));
+        btn.classList.add('selected');
+        maybeEnableStart();
+      };
+    });
+
+    document.querySelectorAll('.mode-btn').forEach(btn=>{
+      btn.onclick=()=>{
+        settings.mode=btn.dataset.mode;
+        document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('selected'));
+        btn.classList.add('selected');
+        maybeEnableStart();
+      };
+    });
+
+    function maybeEnableStart(){
+      elStartBtn.disabled = !(settings.difficulty && settings.mode);
+    }
+
+    /* ========== Game Functions ========== */
+    function setBest(v){
+      best=Math.max(best,v);
+      localStorage.setItem('timeattack_highscore',String(best));
+      elBest.textContent=`Best: ${best}`;
+    }
+
+    function updateHUD(){
+      elScore.textContent=`Score: ${score}`;
+      elBest.textContent=`Best: ${best}`;
+      elTime.textContent=`Time: ${timeLeft.toFixed(1)}s`;
+      elFill.style.width=Math.max(0,Math.min(1,timeLeft/limit))*100+'%';
+    }
+
+    function pickPrompt(card){
+      if(settings.mode==='front') return {prompt:card.front,answer:card.back};
+      if(settings.mode==='back')  return {prompt:card.back,answer:card.front};
+      return Math.random()<0.5 ? {prompt:card.front,answer:card.back} : {prompt:card.back,answer:card.front};
+    }
+
+    function showPrompt(){
+      const pair=pickPrompt(deck[order[idx]]);
+      elPrompt.innerHTML=`<div>${pair.prompt}</div>`;
+      elPrompt.dataset.answer=pair.answer;
+      elInput.value=''; elInput.classList.remove('correct','wrong');
+      elFeedback.textContent='';
+      setTimeout(()=>window.MathJax?.typeset(),0);
+    }
+
+    function startTimer(){
+      timeLeft=limit;
+      updateHUD();
+      if(ticking) clearInterval(ticking);
+      ticking=setInterval(()=>{
+        timeLeft-=0.1;
+        if(timeLeft<=0){
+          timeLeft=0;
+          updateHUD();
+          clearInterval(ticking);
+          endGame();
+        } else {
+          updateHUD();
+        }
+      },100);
+    }
+
+    function nextCard(correct){
+      const diff=DIFFICULTY[settings.difficulty];
+      if(correct){
+        score++;
+        limit=Math.max(diff.min,limit-diff.decay);
+      }
+      idx=(idx+1)%deck.length;
+      showPrompt();
+      startTimer();
+    }
+
+    function endGame(){
+      elInput.disabled=true;
+      elSubmit.disabled=true;
+      elSkip.disabled=true;
+      setBest(score);
+      setTimeout(()=>{
+        alert(`Time's up! Final score: ${score}\nBest: ${best}`);
+        window.location.href='index.html';
+      },100);
+    }
+
+    function checkAnswer(){
+      const user=simplify(elInput.value);
+      const key=simplify(elPrompt.dataset.answer);
+      if(!user) return;
+
+      const diff=DIFFICULTY[settings.difficulty];
+
+      if(user===key){
+        elInput.classList.add('correct');
+        elFeedback.textContent='✅ Correct!';
+        setBest(score+1);
+        setTimeout(()=>nextCard(true),250);
+      }else{
+        // PENALTY: subtract from remaining time and STAY on the same card
+        elInput.classList.add('wrong');
+        elFeedback.textContent=`❌ Incorrect — time −${diff.wrong}s`;
+        timeLeft = Math.max(0, timeLeft - diff.wrong);
+        updateHUD();
+        setTimeout(()=> elInput.classList.remove('wrong'), 250);
+      }
+    }
+
+    function revealAndNext(){
+      const diff=DIFFICULTY[settings.difficulty];
+      elFeedback.innerHTML=`💡 <span class="ghost">Answer:</span> ${elPrompt.dataset.answer} — time −${diff.wrong}s`;
+      // Apply penalty immediately (you'll see the bar shrink), then advance
+      timeLeft = Math.max(0, timeLeft - diff.wrong);
+      updateHUD();
+      setTimeout(()=> nextCard(false), 700);
+    }
+
+    /* ========== Event Listeners ========== */
+    elSubmit.onclick=checkAnswer;
+    elInput.onkeydown=e=>{
+      if(e.key==='Enter'){e.preventDefault();checkAnswer();}
+      if(e.key==='Escape'){e.preventDefault();revealAndNext();}
+    };
+    elSkip.onclick=revealAndNext;
+
+    elStartBtn.onclick=async ()=>{
+      deck=await loadActiveDeck();
+      if(deck.length<2){
+        alert('Need at least 2 cards in your active study set.');
+        window.location.href='manage.html';
+        return;
+      }
+      const diff=DIFFICULTY[settings.difficulty];
+      limit=diff.start;
+      score=0;
+      best=Number(localStorage.getItem('timeattack_highscore')||0);
+      order=shuffle(Array.from(deck.keys()));
+      idx=0;
+
+      elStart.classList.add('hidden');
+      elGame.classList.remove('hidden');
+      setBest(best);
+      showPrompt();
+      startTimer();
+      elInput.focus();
+    };
+  </script>
+</body>
+</html>

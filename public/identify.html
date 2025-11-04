@@ -1,150 +1,191 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-    <title>Identify Formulas</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600;700&display=swap" rel="stylesheet"/>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"/>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script>
-        window.MathJax = {
-            tex: { inlineMath: [['$', '$'], ['\$$', '\$$']], displayMath: [['$$', '$$'], ['\$$', '\$$']] },
-            svg: { fontCache: "global" }
-        };
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Identify Formulas</title>
+
+  <!-- Fonts / icons / styles -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"/>
+  <link rel="stylesheet" href="style.css"/>
+
+  <!-- MathJax (LaTeX) -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$','$$']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
 </head>
 <body>
-    <section id="identify">
-        <h2 style="margin-bottom:15px;">Identify Formula</h2>
-        
-        <div id="identifyStartScreen">
-            <p>Select difficulty level and press Play to begin:</p>
-            <div class="difficulty-selector">
-                <button class="btn difficulty-btn" data-level="easy">Easy</button>
-                <button class="btn difficulty-btn" data-level="medium">Medium</button>
-                <button class="btn difficulty-btn" data-level="hard">Hard</button>
-            </div>
-            <button class="btn primary" id="identifyPlay" style="margin-top: 20px; display: none;">Play</button>
-        </div>
-        
-        <div id="identifyGameScreen" class="hidden">
-            <div class="score-display" id="identifyScore">Score: 0/0</div>
-            <div class="round-display" id="identifyRound">Round: 1</div>
-            <div id="identifyQuestion" class="question"></div>
-            <div id="identifyChoices" class="choices"></div>
-            <button class="btn" id="identifyBack" onclick="window.location.href='index.html'">
-                <span class="material-symbols-rounded">home</span> Back to Home
-            </button>
-        </div>
-    </section>
+  <section id="identify" class="glass" style="max-width:900px;margin:40px auto;padding:24px;">
+    <header style="text-align:center;margin-bottom:18px;">
+      <h1 style="font-weight:700;">Identify Formulas</h1>
+      <p class="subtitle">Given a term/question, pick the correct formula.</p>
+    </header>
 
-    <script type="module">
-        let identifyDifficulty = null;
-        let identifyScore = 0;
-        let identifyRound = 1;
-        let identifyQuestions = [];
-        let currentIdentifyQuestionIndex = 0;
-        let identifyQs = {};
+    <!-- Score / progress -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div id="idScore" class="subtitle">Score: 0 / 0</div>
+      <div id="idProgress" class="subtitle">Question 0 / 0</div>
+    </div>
+    <div class="progress"><div id="idProgressBar"></div></div>
 
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
+    <!-- Question -->
+    <div id="idQuestion" class="glass" style="margin-top:16px;padding:18px;min-height:88px;"></div>
+
+    <!-- Choices -->
+    <div id="idChoices" style="display:grid;grid-template-columns:1fr;gap:10px;margin-top:16px;"></div>
+
+    <!-- Controls -->
+    <div style="display:flex;justify-content:center;gap:10px;margin-top:18px;">
+      <button id="idNext" class="btn" disabled>Next</button>
+      <button class="btn" onclick="window.location.href='index.html'">
+        <span class="material-symbols-rounded">home</span>
+      </button>
+    </div>
+  </section>
+
+  <script>
+    /* ---------------- Utilities ---------------- */
+
+    function shuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function sample(arr, k) {
+      const a = shuffle(arr);
+      return a.slice(0, Math.min(k, a.length));
+    }
+
+    /** Build MCQs from a deck [{front, back}] */
+    function buildIdentifyQuestionsFromDeck(deck, count = 5, choices = 4) {
+      if (!Array.isArray(deck) || deck.length < choices) return [];
+      const picked = sample(deck, Math.min(count, deck.length));
+      return picked.map(card => {
+        const distractors = sample(deck.filter(c => c !== card), choices - 1).map(c => c.back);
+        const answers = shuffle([card.back, ...distractors]);
+        return {
+          prompt: card.front,
+          choices: answers,
+          correct: answers.indexOf(card.back)
+        };
+      });
+    }
+
+    /** Load active set’s cards from backend; fallback to legacy JSON bank */
+    async function loadDeckForIdentify() {
+      const activeId = localStorage.getItem('selectedSetId');
+      if (activeId) {
+        try {
+          const res = await fetch('/api/studySets');
+          if (res.ok) {
+            const sets = await res.json();
+            const set = sets.find(s => String(s.id) === String(activeId));
+            if (set && Array.isArray(set.cards) && set.cards.length) {
+              return set.cards;
             }
+          }
+        } catch (e) {
+          console.warn('Could not load active set for Identify:', e);
         }
+      }
+      // Fallback: legacy JSON (kept for compatibility)
+      try {
+        const resp = await fetch('flashcard.json'); // same shape {front,back}
+        if (resp.ok) return await resp.json();
+      } catch {}
+      return [];
+    }
 
-        async function loadData() {
-            const response = await fetch('/data/formulaidentify.json');
-            identifyQs = await response.json();
-        }
+    /* ---------------- Game State ---------------- */
+    let questions = [];        // [{prompt, choices[], correct}]
+    let idx = 0;
+    let score = 0;
 
-        function startIdentifyGame() {
-            identifyScore = 0;
-            identifyRound = 1;
-            identifyQuestions = [...identifyQs[identifyDifficulty]];
-            shuffleArray(identifyQuestions);
-            identifyQuestions = identifyQuestions.slice(0, 5);
-            currentIdentifyQuestionIndex = 0;
-            
-            document.getElementById('identifyStartScreen').classList.add('hidden');
-            document.getElementById('identifyGameScreen').classList.remove('hidden');
-            
-            displayIdentifyQuestion();
-        }
+    function updateHUD() {
+      document.getElementById('idScore').textContent = `Score: ${score} / ${questions.length}`;
+      document.getElementById('idProgress').textContent = `Question ${idx + 1} / ${questions.length}`;
+      document.getElementById('idProgressBar').style.width =
+        ((idx + 1) / Math.max(1, questions.length) * 100) + '%';
+    }
 
-        function displayIdentifyQuestion() {
-            if (currentIdentifyQuestionIndex >= identifyQuestions.length) {
-                if (identifyScore === identifyQuestions.length) {
-                    confetti({
-                        particleCount: 150,
-                        spread: 70,
-                        origin: { y: 0.6 }
-                    });
-                    setTimeout(() => {
-                        alert(`Perfect round! You got all ${identifyQuestions.length} correct!`);
-                        startIdentifyGame();
-                    }, 1000);
-                } else {
-                    alert(`Round completed! Score: ${identifyScore}/${identifyQuestions.length}`);
-                    startIdentifyGame();
-                }
-                return;
-            }
-            
-            const q = identifyQuestions[currentIdentifyQuestionIndex];
-            document.getElementById('identifyScore').textContent = `Score: ${identifyScore}/${identifyQuestions.length}`;
-            document.getElementById('identifyRound').textContent = `Question: ${currentIdentifyQuestionIndex + 1}/${identifyQuestions.length}`;
-            document.getElementById('identifyQuestion').innerHTML = `<div>${q.prompt}</div>`;
-            
-            const box = document.getElementById('identifyChoices');
-            box.innerHTML = '';
-            
-            const shuffledChoices = [...q.choices];
-            shuffleArray(shuffledChoices);
-            
-            shuffledChoices.forEach((choiceText) => {
-                const choiceIndex = q.choices.indexOf(choiceText);
-                const btn = document.createElement('button');
-                btn.className = 'choice';
-                btn.innerHTML = choiceText;
-                btn.onclick = function() {
-                    if (btn.classList.contains('correct') || btn.classList.contains('wrong')) return;
-                    
-                    const correct = choiceIndex === q.correct;
-                    btn.className = correct ? 'choice correct' : 'choice wrong';
-                    
-                    if (correct) identifyScore++;
-                    
-                    setTimeout(() => {
-                        currentIdentifyQuestionIndex++;
-                        displayIdentifyQuestion();
-                    }, 1200);
-                };
-                box.appendChild(btn);
-            });
-            
-            setTimeout(() => window.MathJax.typeset(), 0);
-        }
+    function renderQuestion() {
+      const q = questions[idx];
+      document.getElementById('idQuestion').innerHTML = `<div>${q.prompt}</div>`;
 
-        async function init() {
-            await loadData();
-            
-            document.querySelectorAll('.difficulty-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    identifyDifficulty = this.dataset.level;
-                    document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('selected'));
-                    this.classList.add('selected');
-                    document.getElementById('identifyPlay').style.display = 'inline-flex';
-                });
-            });
-            
-            document.getElementById('identifyPlay').addEventListener('click', startIdentifyGame);
-        }
+      const box = document.getElementById('idChoices');
+      box.innerHTML = '';
+      q.choices.forEach((choiceText, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'choice';
+        btn.innerHTML = choiceText;
+        btn.onclick = () => handleChoice(i, btn);
+        box.appendChild(btn);
+      });
 
-        init();
-    </script>
+      document.getElementById('idNext').disabled = true;
+      setTimeout(() => { if (window.MathJax?.typeset) MathJax.typeset(); }, 0);
+      updateHUD();
+    }
+
+    function handleChoice(choiceIdx, btnEl) {
+      const q = questions[idx];
+      // lock all buttons
+      document.querySelectorAll('#idChoices .choice').forEach(b => b.disabled = true);
+
+      const correct = (choiceIdx === q.correct);
+      if (correct) {
+        score++;
+        btnEl.classList.add('correct');
+      } else {
+        btnEl.classList.add('wrong');
+        // highlight the correct one
+        const correctBtn = document.querySelectorAll('#idChoices .choice')[q.correct];
+        if (correctBtn) correctBtn.classList.add('correct');
+      }
+      document.getElementById('idNext').disabled = false;
+      updateHUD();
+    }
+
+    function nextQuestion() {
+      idx++;
+      if (idx >= questions.length) {
+        setTimeout(() => {
+          alert(`Finished! Score: ${score}/${questions.length}`);
+          window.location.href = 'index.html';
+        }, 100);
+        return;
+      }
+      renderQuestion();
+    }
+
+    document.getElementById('idNext').addEventListener('click', nextQuestion);
+
+    /* ---------------- Boot ---------------- */
+    document.addEventListener('DOMContentLoaded', async () => {
+      const deck = await loadDeckForIdentify();
+
+      // Need at least 4 cards to build 4-choice questions
+      if (!deck || deck.length < 4) {
+        alert('Your active study set needs at least 4 cards to play Identify. Please add more cards or choose another set in Manage.');
+        window.location.href = 'manage.html';
+        return;
+      }
+
+      // Build questions (tweak count as desired)
+      questions = buildIdentifyQuestionsFromDeck(deck, 5, 4);
+      idx = 0;
+      score = 0;
+      renderQuestion();
+    });
+  </script>
 </body>
 </html>

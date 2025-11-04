@@ -1,96 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-    <title>Formula Flip Cards</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600;700&display=swap" rel="stylesheet"/>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"/>
-    <script>
-        window.MathJax = {
-            tex: { inlineMath: [['$', '$'], ['\$$', '\$$']], displayMath: [['$$', '$$'], ['\$$', '\$$']] },
-            svg: { fontCache: "global" }
-        };
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Formula Flip Cards</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" />
+  <link rel="stylesheet" href="style.css">
+
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] },
+      svg: { fontCache: "global" }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
 </head>
+
 <body>
-    <section id="game">
-        <header id="gameHeader" style="text-align:center;margin-bottom:20px;">
-            <h1 id="gameTitle">Formula Flip Cards</h1>
-            <p id="gameSubtitle" class="subtitle">Press space / swipe to navigate</p>
-        </header>
+  <section id="game">
+    <header id="gameHeader" style="text-align:center;margin-bottom:20px;">
+      <h1 id="gameTitle">Formula Flip Cards</h1>
+      <p id="gameSubtitle" class="subtitle">Press space / swipe to navigate</p>
+    </header>
 
-        <div class="flashcard-container glass">
-            <div class="flashcard" id="flashCard">
-                <div class="front" id="flashFront"></div>
-                <div class="back"  id="flashBack"></div>
-            </div>
-        </div>
+    <div class="flashcard-container glass">
+      <div class="flashcard" id="flashCard">
+        <div class="front" id="flashFront"></div>
+        <div class="back" id="flashBack"></div>
+      </div>
+    </div>
 
-        <div class="progress"><div id="progressBar"></div></div>
+    <div class="progress"><div id="progressBar"></div></div>
 
-        <div class="controls">
-            <button class="btn" id="btnPrev"><span class="material-symbols-rounded">chevron_left</span></button>
-            <button class="btn primary" id="btnFlip">Flip</button>
-            <button class="btn" id="btnNext"><span class="material-symbols-rounded">chevron_right</span></button>
-            <button class="btn" id="btnShuffle"><span class="material-symbols-rounded">shuffle</span></button>
-            <button class="btn" id="btnHome" onclick="window.location.href='index.html'"><span class="material-symbols-rounded">home</span></button>
-        </div>
-        <div class="counter" id="gameCounter"></div>
-    </section>
+    <div class="controls">
+      <button class="btn" id="btnPrev"><span class="material-symbols-rounded">chevron_left</span></button>
+      <button class="btn primary" id="btnFlip">Flip</button>
+      <button class="btn" id="btnNext"><span class="material-symbols-rounded">chevron_right</span></button>
+      <button class="btn" id="btnShuffle"><span class="material-symbols-rounded">shuffle</span></button>
+      <button class="btn" id="btnHome" onclick="window.location.href='index.html'"><span class="material-symbols-rounded">home</span></button>
+    </div>
 
-    <script type="module">
-        async function loadData() {
-            const response = await fetch('/data/flashcard.json');
-            return await response.json();
-        }
+    <div class="counter" id="gameCounter"></div>
+  </section>
 
-        async function init() {
-            const deck = await loadData();
-            let flashIdx = 0;
-            
-            function renderFlash() {
-                const card = deck[flashIdx];
-                document.getElementById('flashFront').innerHTML = `<div style="font-size:1.35rem;font-weight:600;">${card.front}</div>`;
-                document.getElementById('flashBack').innerHTML = `<div style="font-size:0.95rem;line-height:1.4;">${card.back}</div>`;
-                document.getElementById('gameCounter').textContent = `Card ${flashIdx+1} / ${deck.length}`;
-                document.getElementById('progressBar').style.width = ((flashIdx+1)/deck.length*100)+'%';
-                setTimeout(() => window.MathJax.typeset(), 0);
+  <script>
+    /** Load deck for the active study set (fallback to flashcard.json if none) */
+    async function loadActiveDeck() {
+      const activeId = localStorage.getItem('selectedSetId');
+      if (activeId) {
+        try {
+          const res = await fetch('/api/studySets');
+          if (res.ok) {
+            const sets = await res.json();
+            const set = sets.find(s => String(s.id) === String(activeId));
+            if (set && Array.isArray(set.cards) && set.cards.length) {
+              console.log('Loaded active study set:', set.title);
+              return set.cards;
             }
-            
-            document.getElementById('btnNext').onclick = () => {
-                flashIdx = (flashIdx+1) % deck.length;
-                renderFlash();
-            };
-            
-            document.getElementById('btnPrev').onclick = () => {
-                flashIdx = (flashIdx-1+deck.length) % deck.length;
-                renderFlash();
-            };
-            
-            document.getElementById('btnFlip').onclick = () => {
-                document.getElementById('flashCard').classList.toggle('flipped');
-            };
-            
-            document.getElementById('btnShuffle').onclick = () => {
-                for(let i=deck.length-1; i>0; i--) {
-                    const j = Math.floor(Math.random()*(i+1));
-                    [deck[i], deck[j]] = [deck[j], deck[i]];
-                }
-                flashIdx = 0;
-                renderFlash();
-            };
-            
-            document.getElementById('flashCard').onclick = () => {
-                document.getElementById('flashCard').classList.toggle('flipped');
-            };
-            
-            renderFlash();
+          }
+        } catch (e) {
+          console.warn('Failed to load active set:', e);
         }
+      }
 
-        init();
-    </script>
+      // Fallback to sample file if no active set found
+      console.warn('No active study set found. Falling back to flashcard.json.');
+      const response = await fetch('flashcard.json');
+      return await response.json();
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const deck = await loadActiveDeck();
+
+      if (!deck || !deck.length) {
+        alert('No cards found in the active study set. Please create a set and click "Set Active" in Manage Study Sets.');
+        window.location.href = 'manage.html';
+        return;
+      }
+
+      let flashIdx = 0;
+
+      function renderFlash() {
+        const card = deck[flashIdx] || {};
+        document.getElementById('flashFront').innerHTML =
+          `<div style="font-size:1.35rem;font-weight:600;">${card.front ?? ''}</div>`;
+        document.getElementById('flashBack').innerHTML =
+          `<div style="font-size:0.95rem;line-height:1.4;">${card.back ?? ''}</div>`;
+        document.getElementById('gameCounter').textContent =
+          `Card ${flashIdx + 1} / ${deck.length}`;
+        document.getElementById('progressBar').style.width =
+          ((flashIdx + 1) / deck.length * 100) + '%';
+        setTimeout(() => { if (window.MathJax?.typeset) MathJax.typeset(); }, 0);
+      }
+
+      // --- Controls ---
+      document.getElementById('btnNext').onclick = () => {
+        flashIdx = (flashIdx + 1) % deck.length;
+        renderFlash();
+      };
+      document.getElementById('btnPrev').onclick = () => {
+        flashIdx = (flashIdx - 1 + deck.length) % deck.length;
+        renderFlash();
+      };
+      document.getElementById('btnFlip').onclick = () =>
+        document.getElementById('flashCard').classList.toggle('flipped');
+      document.getElementById('btnShuffle').onclick = () => {
+        for (let i = deck.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+        flashIdx = 0;
+        renderFlash();
+      };
+      document.getElementById('flashCard').onclick = () =>
+        document.getElementById('flashCard').classList.toggle('flipped');
+
+      renderFlash();
+    });
+  </script>
 </body>
 </html>

@@ -5,19 +5,104 @@ function show(screen){
     document.querySelector(screen).classList.remove('hidden');
 }
 
-/* ---------- Load data from JSON files ---------- */
-async function loadData() {
-    const flashcardResponse = await fetch('flashcard.json');
-    const deck = await flashcardResponse.json();
-    
-    const orderResponse = await fetch('orderquestion.json');
-    const orderQs = await orderResponse.json();
-    
-    const identifyResponse = await fetch('formulaidentify.json');
-    const identifyQs = await identifyResponse.json();
-    
-    return { deck, orderQs, identifyQs };
+/* ---------- Active-set helpers ---------- */
+function getSelectedSetId() {
+  return localStorage.getItem('selectedSetId'); // null if none
 }
+function setSelectedSetId(idOrNull) {
+  if (idOrNull) localStorage.setItem('selectedSetId', idOrNull);
+  else localStorage.removeItem('selectedSetId');
+}
+
+function getSelectedSetId(){ return localStorage.getItem('selectedSetId'); }
+
+async function listStudySets() {
+  const res = await fetch('/api/studySets');
+  if (!res.ok) return [];
+  return res.json();
+}
+
+async function loadDeckFromStudySet(setId) {
+  const sets = await listStudySets();
+  const match = sets.find(s => s.id === setId);
+  return match?.cards ?? null;
+}
+
+/* Build & wire the Home-page picker */
+async function initSetPicker() {
+  const box = document.getElementById('activeSetBox');
+  if (!box) return;
+
+  const select = document.getElementById('setPicker');
+  const hint   = document.getElementById('activeSetHint');
+  const useBtn = document.getElementById('activateSetBtn');
+  const clrBtn = document.getElementById('clearSetBtn');
+
+  const sets = await listStudySets();
+  select.innerHTML = '<option value="">— Select a set —</option>' +
+    sets.map(s => `<option value="${s.id}">${s.title}</option>`).join('');
+
+  const current = getSelectedSetId();
+  if (current) {
+    select.value = current;
+    const cur = sets.find(s => s.id === current);
+    hint.textContent = cur ? `Active: ${cur.title}` : `Active set selected`;
+  } else {
+    hint.textContent = 'No active set (using sample deck by default).';
+  }
+
+  useBtn.onclick = () => {
+    const id = select.value;
+    if (id) {
+      setSelectedSetId(id);
+      const cur = sets.find(s => s.id === id);
+      hint.textContent = `Active: ${cur ? cur.title : id}`;
+      alert('Active set updated. Open a game to use it.');
+    }
+  };
+
+  clrBtn.onclick = () => {
+    setSelectedSetId(null);
+    select.value = '';
+    hint.textContent = 'No active set (using sample deck by default).';
+  };
+}
+
+
+/* ----------- Load data ----------- */
+async function loadData() {
+  // Defaults (old behavior)
+  const flashcardResponse = await fetch('flashcard.json');
+  let deck = await flashcardResponse.json();
+
+  // These are unused once we switch Identify/Order to generated Qs, but keep for fallback
+  const orderResponse = await fetch('orderquestion.json');
+  const orderQsDefault = await orderResponse.json();
+
+  const identifyResponse = await fetch('formulaidentify.json');
+  const identifyQsDefault = await identifyResponse.json();
+
+  // Override deck if user has an active set (chosen in Manage)
+  try {
+    const id = getSelectedSetId();
+    if (id) {
+      const res = await fetch('/api/studySets');
+      if (res.ok) {
+        const sets = await res.json();
+        const s = sets.find(x => x.id === id);
+        if (s && Array.isArray(s.cards) && s.cards.length) {
+          deck = s.cards; // [{front, back}, ...]
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Active set override failed; using default deck', e);
+  }
+
+  return { deck, orderQsDefault, identifyQsDefault };
+}
+
+
 
 /* ---------- Initialize the app ---------- */
 async function init() {
@@ -27,14 +112,17 @@ async function init() {
     document.querySelectorAll('[data-route]').forEach(card=>{
         card.addEventListener('click', async ()=>{
             const route=card.dataset.route;
-            if(route==='flip') initFlashGame(deck);
+            if (route === 'flip') {
+                const { deck: currentDeck } = await loadData();
+                initFlashGame(currentDeck);
+            }
             if(route==='identify') showIdentifyStart();
             if(route==='order') showOrderStart();
             if (route === 'manage') {
-                // Dynamically import manage.js only when needed
-                const { showManageSets } = await import('./manage.js');
-                showManageSets();
+                window.location.href = 'manage.html';
+                return;
             }
+
         });
     });
     
@@ -64,6 +152,32 @@ async function init() {
         
         renderFlash();
     }
+
+    function sample(arr, k) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a.slice(0, k);
+    }
+
+    function buildIdentifyQuestionsFromDeck(deck, count = 5, choices = 4) {
+    // Need at least 'choices' cards to build MCQs
+    if (!Array.isArray(deck) || deck.length < choices) return [];
+
+    const picked = sample(deck, Math.min(count, deck.length));
+        return picked.map(card => {
+            const distractors = sample(deck.filter(c => c !== card), choices - 1).map(c => c.back);
+            const answers = sample([card.back, ...distractors], choices);
+            const correctIdx = answers.indexOf(card.back);
+            return {
+            prompt: card.front,
+            choices: answers,
+            correct: correctIdx
+            };
+        });
+    }
     
     /* ---------- IDENTIFY mode ---------- */
     let identifyDifficulty = null;
@@ -73,32 +187,32 @@ async function init() {
     let currentIdentifyQuestionIndex = 0;
     
     function showIdentifyStart() {
-        show(routes.identify);
-        document.getElementById('identifyStartScreen').classList.remove('hidden');
-        document.getElementById('identifyGameScreen').classList.add('hidden');
-        
-        // Reset difficulty buttons
-        document.querySelectorAll('#identify .difficulty-btn').forEach(btn => {
-            btn.classList.remove('selected');
-        });
-        document.getElementById('identifyPlay').style.display = 'none';
-        
-        // Difficulty button listeners
-        document.querySelectorAll('#identify .difficulty-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                identifyDifficulty = this.dataset.level;
-                document.querySelectorAll('#identify .difficulty-btn').forEach(b => b.classList.remove('selected'));
-                this.classList.add('selected');
-                document.getElementById('identifyPlay').style.display = 'inline-flex';
-            });
-        });
-        
-        // Play button listener
-        document.getElementById('identifyPlay').addEventListener('click', startIdentifyGame);
-        
-        // Back button listener
-        document.getElementById('identifyBack').addEventListener('click', () => show(routes.home));
+        (async () => {
+            const { deck } = await loadData(); // <-- active set
+            identifyDifficulty = null;
+            identifyScore = 0;
+            identifyRound = 1;
+
+            // Build questions from the active deck
+            // (You can vary count by "difficulty" if you want.)
+            identifyQuestions = buildIdentifyQuestionsFromDeck(deck, 5, 4);
+
+            if (!identifyQuestions.length) {
+            alert('Not enough cards in the active set to build Identify questions (need at least 4).');
+            show(routes.home);
+            return;
+            }
+
+            // Show the screen (you can keep your existing UI)
+            show(routes.identify);
+            document.getElementById('identifyStartScreen').classList.add('hidden');
+            document.getElementById('identifyGameScreen').classList.remove('hidden');
+            currentIdentifyQuestionIndex = 0;
+            identifyScore = 0;
+            displayIdentifyQuestion();
+        })();
     }
+
     
     function startIdentifyGame() {
         identifyScore = 0;
@@ -344,6 +458,8 @@ async function init() {
     
     /* INIT */
     show(routes.home);
+
+    await initSetPicker();
 }
 
 // Start the app
