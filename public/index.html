@@ -1,46 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-    <title>SOA Financial Mathematics – Modular Route</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600;700&display=swap" rel="stylesheet"/>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"/>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>SOA Financial Mathematics – Modular Route</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"/>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!---------- HOME (default route) ---------->
-<section id="home">
-    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%2300c4ff' width='65' height='65'%3E%3Cpath d='M50 5L95 25v40L50 85 5 65V25z'/%3E%3C/svg%3E" alt="logo"/>
-    <h1 style="font-weight:700;margin:.5em 0;">Choose Your Mode</h1>
+  <!-- BACKDROP -->
+  <div class="backdrop"></div>
 
-        <div class="option-card" onclick="window.location.href='manage.html'">
-            <span class="option-icon material-symbols-rounded">folder_open</span>
-            <span class="option-title">Manage Study Sets</span>
-            <span class="option-desc">Create, edit, or delete your study sets</span>
+  <!-- HOME -->
+  <section id="home" class="page active">
+    <div class="hero">
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%2300c4ff' width='65' height='65'%3E%3Cpath d='M50 5L95 25v40L50 85 5 65V25z'/%3E%3C/svg%3E" alt="logo"/>
+      <h1>Financial Mathematics Toolkit</h1>
+      <p>Master formulas, identify concepts, and practice with adaptive flashcards.</p>
+    </div>
+
+    <div class="grid">
+      <a href="manage.html" class="option-card">
+        <span class="option-icon material-symbols-rounded">folder_open</span>
+        <h2 class="option-title">Manage Study Sets</h2>
+        <p class="option-desc">Create, edit, or delete your own question decks.</p>
+      </a>
+
+      <a href="flashcards.html" class="option-card">
+        <span class="option-icon material-symbols-rounded">flip</span>
+        <h2 class="option-title">Formula Flip Cards</h2>
+        <p class="option-desc">Traditional front/back flashcards with SOA Financial Math.</p>
+      </a>
+
+      <a href="identify.html" class="option-card">
+        <span class="option-icon material-symbols-rounded">quiz</span>
+        <h2 class="option-title">Identify Formulas</h2>
+        <p class="option-desc">Given a question, choose the correct formula to use.</p>
+      </a>
+
+      <a href="timeattack.html" class="option-card gradient-red">
+        <span class="option-icon material-symbols-rounded">timer</span>
+        <h2 class="option-title">Time Attack</h2>
+        <p class="option-desc">Beat the clock — answer before the timer expires.</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- GAME SECTIONS (Hidden by default) -->
+  <section id="game" class="page hidden">
+    <div class="flashcard-container">
+      <div id="flashCard" class="flashcard">
+        <div class="front">
+          <div id="flashFront"></div>
         </div>
-
-        <div class="option-card" onclick="window.location.href='flashcards.html'">
-            <span class="option-icon material-symbols-rounded">flip</span>
-            <span class="option-title">Formula Flip Cards</span>
-            <span class="option-desc">Traditional front/back flashcards with SOA Financial Math formulas</span>
+        <div class="back">
+          <div id="flashBack"></div>
         </div>
+      </div>
+    </div>
+    
+    <div class="progress">
+      <div id="progressBar"></div>
+    </div>
+    
+    <div class="score-display" id="gameCounter">Card 1 / 10</div>
+    
+    <div class="controls">
+      <button id="btnPrev" class="btn btn-secondary">
+        <span class="material-symbols-rounded">arrow_back</span> Previous
+      </button>
+      <button id="btnFlip" class="btn btn-primary">
+        <span class="material-symbols-rounded">flip</span> Flip
+      </button>
+      <button id="btnNext" class="btn btn-secondary">
+        Next <span class="material-symbols-rounded">arrow_forward</span>
+      </button>
+    </div>
+    
+    <div class="controls">
+      <button id="btnShuffle" class="btn btn-secondary">
+        <span class="material-symbols-rounded">shuffle</span> Shuffle
+      </button>
+      <button id="btnHome" class="btn btn-secondary">
+        <span class="material-symbols-rounded">home</span> Home
+      </button>
+    </div>
+  </section>
 
-        <div class="option-card" onclick="window.location.href='identify.html'">
-            <span class="option-icon material-symbols-rounded">quiz</span>
-            <span class="option-title">Identify Formulas</span>
-            <span class="option-desc">Given a question, pick the correct formula to use</span>
-        </div>
+  <section id="identify" class="page hidden">
+    <div class="question" id="identifyQuestion"></div>
+    
+    <div class="score-display" id="identifyScore">Score: 0/5</div>
+    <div class="round-display" id="identifyRound">Question: 1/5</div>
+    
+    <div class="choices" id="identifyChoices"></div>
+    
+    <div class="controls">
+      <button id="identifyBack" class="btn btn-secondary">
+        <span class="material-symbols-rounded">arrow_back</span> Back
+      </button>
+    </div>
+  </section>
 
-        <!-- Time Attack -->
-        <div class="option-card" onclick="window.location.href='timeattack.html'">
-            <span class="material-symbols-rounded mode-icon">timer</span>
-            <h3>Time Attack</h3>
-            <p>Answer before the timer expires — time shrinks with each correct answer.</p>
-        </div>
+  <section id="order" class="page hidden">
+    <div class="question" id="orderScenario"></div>
+    
+    <div class="score-display" id="orderScore">Score: 0/5</div>
+    <div class="round-display" id="orderRound">Question: 1/5</div>
+    
+    <div id="orderSteps" class="order-steps"></div>
+    
+    <div id="orderMsg"></div>
+    
+    <div class="controls">
+      <button id="orderCheck" class="btn btn-primary">
+        <span class="material-symbols-rounded">check</span> Check Order
+      </button>
+      <button id="orderBack" class="btn btn-secondary">
+        <span class="material-symbols-rounded">arrow_back</span> Back
+      </button>
+    </div>
+  </section>
 
-    </section>
+  <section id="timeattack" class="page hidden">
+    <div class="timer-display" id="timeAttackTimer">30</div>
+    
+    <div class="question" id="timeAttackQuestion"></div>
+    
+    <div class="score-display" id="timeAttackScore">Score: 0</div>
+    
+    <div class="choices" id="timeAttackChoices"></div>
+    
+    <div class="controls">
+      <button id="timeAttackBack" class="btn btn-secondary">
+        <span class="material-symbols-rounded">arrow_back</span> Back
+      </button>
+    </div>
+  </section>
 
+  <!-- scripts -->
+  <script src="backend.js"></script>
+  <script src="flashcards.js"></script>
+  <script src="identify.js"></script>
+  <script src="order.js"></script>
+  <script src="timeattack.js"></script>
 </body>
 </html>
