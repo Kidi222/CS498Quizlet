@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Match</title>
+
+  <!-- Fonts + Base Styles -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"/>
+  <link rel="stylesheet" href="style.css"/>
+
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$','$$']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+
+<body>
+  <div class="ta-wrap match-wrap" style="max-width:1100px;margin:40px auto;padding:24px;">
+
+    <!-- ===================== START SCREEN ===================== -->
+    <section id="matchStart">
+      <header class="prompt-top" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <h1 class="page-title" style="font-size:28px;font-weight:700;margin-right:auto;">Match</h1>
+
+        <!-- home icon -->
+        <button id="startHome" class="btn icon" title="Home" onclick="window.location.href='index.html'">
+          <span class="material-symbols-rounded">home</span>
+        </button>
+      </header>
+
+      <!-- Mode buttons (like Time Attack style) -->
+      <div class="d-center" style="margin-top:12px;">
+        <button class="btn mode-btn selected" data-pairs="8">8 pairs</button>
+        <button class="btn mode-btn" data-pairs="10">10 pairs</button>
+        <button class="btn mode-btn" data-pairs="12">12 pairs</button>
+      </div>
+
+      <div style="display:flex;gap:18px;align-items:center;margin-top:14px;flex-wrap:wrap;">
+        <div class="glass" style="padding:10px 14px;border-radius:14px;">
+          <span style="display:block;font-size:12px;opacity:.7;">Best</span>
+          <strong id="startBest" style="font-size:18px;">—</strong>
+        </div>
+      </div>
+
+      <footer class="best-times" style="margin-top:18px;">
+        <h2 class="subheading" style="font-size:16px;color:#a0a8bd;margin-bottom:8px;">Top 5 Times</h2>
+        <ol id="startBestList" class="best-list" style="list-style:none;display:flex;gap:14px;flex-wrap:wrap;padding-left:0;"></ol>
+      </footer>
+
+      <div class="d-center" style="margin-top:18px;">
+        <button id="btnStart" class="btn primary">Start</button>
+      </div>
+    </section>
+
+    <!-- ===================== GAME SCREEN ===================== -->
+    <section id="matchGame" class="hidden">
+      <header class="prompt-top" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <h1 class="page-title" style="font-size:28px;font-weight:700;margin-right:auto;">Match</h1>
+
+        <!-- (hidden in play) mode buttons kept for optional debug; JS will hide them -->
+        <div class="d-center">
+          <button class="btn mode-btn" disabled id="mode8">8 pairs</button>
+          <button class="btn mode-btn" disabled id="mode10">10 pairs</button>
+          <button class="btn mode-btn" disabled id="mode12">12 pairs</button>
+        </div>
+
+        <!-- Restart + Home icon -->
+        <button id="btnRestart" class="btn">Restart</button>
+        <button id="gameHome" class="btn icon" title="Home" onclick="window.location.href='index.html'">
+          <span class="material-symbols-rounded">home</span>
+        </button>
+      </header>
+
+      <div style="display:flex;gap:18px;align-items:center;margin-top:14px;flex-wrap:wrap;">
+        <div class="glass" style="padding:10px 14px;border-radius:14px;">
+          <span style="display:block;font-size:12px;opacity:.7;">Time</span>
+          <strong id="clock" style="font-size:18px;">00:00.0</strong>
+        </div>
+        <div class="glass" style="padding:10px 14px;border-radius:14px;">
+          <span style="display:block;font-size:12px;opacity:.7;">Matched</span>
+          <strong id="matchedCount" style="font-size:18px;">0</strong>
+        </div>
+        <div class="glass" style="padding:10px 14px;border-radius:14px;">
+          <span style="display:block;font-size:12px;opacity:.7;">Best</span>
+          <strong id="gameBest" style="font-size:18px;">—</strong>
+        </div>
+      </div>
+
+      <main>
+        <section id="grid" class="match-grid" aria-label="Matching grid"
+          style="margin-top:22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;"></section>
+      </main>
+    </section>
+  </div>
+
+  <!-- Inline logic -->
+  <script>
+    // ===== Helpers =====
+    function fmt(ms){ const t=Math.floor(ms),m=Math.floor(t/60000),s=Math.floor((t%60000)/1000),d=Math.floor((t%1000)/100);
+      return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${d}`; }
+    function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+    async function loadActiveDeck(){
+      const activeId = localStorage.getItem('selectedSetId');   // set by Manage page
+      if (activeId) {
+        try {
+          const res = await fetch('/api/studySets');
+          if (res.ok) {
+            const sets = await res.json();
+            const set = sets.find(s => String(s.id) === String(activeId));
+            if (set?.cards?.length) return set.cards;           // [{front, back}, ...]
+          }
+        } catch {}
+      }
+      // Fallback sample
+      const fb = await fetch('flashcard.json');
+      return await fb.json();
+    }
+
+    // ===== State =====
+    let started=false, startTime=0, raf=null;
+    let matched=0, totalPairs=0, first=null, lock=false;
+    let pairsSetting = 8;  // default selection on start screen
+    let availablePairs = 0;
+
+    // Per-mode bests
+    const bestKey = () => 'match_bestTimes_' + pairsSetting;
+    const loadBest = () => { try{ return JSON.parse(localStorage.getItem(bestKey())||'[]'); }catch{ return []; } };
+    const saveBest = (list) => localStorage.setItem(bestKey(), JSON.stringify(list.slice(0,5)));
+
+    // ===== UI elements =====
+    const startScreen = document.getElementById('matchStart');
+    const gameScreen  = document.getElementById('matchGame');
+
+    const modeBtns = Array.from(document.querySelectorAll('#matchStart .mode-btn'));
+    const startBestEl = document.getElementById('startBest');
+    const startBestListEl = document.getElementById('startBestList');
+
+    const btnStart = document.getElementById('btnStart');
+    const btnRestart = document.getElementById('btnRestart');
+
+    const grid  = document.getElementById('grid');
+    const clock = document.getElementById('clock');
+    const matchedEl = document.getElementById('matchedCount');
+    const gameBestEl = document.getElementById('gameBest');
+
+    // read-only indicators (hidden at runtime)
+    const mode8 = document.getElementById('mode8');
+    const mode10 = document.getElementById('mode10');
+    const mode12 = document.getElementById('mode12');
+
+    function setModeButtonsUI() {
+      // used only if you decide to show read-only chips during play
+      [mode8, mode10, mode12].forEach(b => b?.classList.remove('selected'));
+      if (pairsSetting === 8) mode8?.classList.add('selected');
+      if (pairsSetting === 10) mode10?.classList.add('selected');
+      if (pairsSetting === 12) mode12?.classList.add('selected');
+    }
+
+    function renderStartBests(){
+      const list = loadBest();
+      startBestEl.textContent = list.length ? fmt(list[0]) : '—';
+      startBestListEl.innerHTML = '';
+      list.slice(0,5).forEach((ms,i)=>{
+        const li=document.createElement('li');
+        li.textContent = `${i+1}. ${fmt(ms)}`;
+        li.className = 'glass';
+        li.style.cssText = 'border-radius:12px;padding:8px 12px;font-variant-numeric:tabular-nums;';
+        startBestListEl.appendChild(li);
+      });
+    }
+
+    // ===== Availability logic =====
+    async function getAvailablePairs() {
+      const deck = await loadActiveDeck();
+      const valid = deck.filter(c => (c.front ?? c.term) && (c.back ?? c.definition));
+      return valid.length;
+    }
+
+    function updateModeAvailability() {
+      modeBtns.forEach(b => {
+        const p = parseInt(b.dataset.pairs, 10);
+        if (p > availablePairs) {
+          b.setAttribute('disabled', 'true');
+          b.title = `Need at least ${p} pairs (you have ${availablePairs})`;
+          b.classList.remove('selected');
+        } else {
+          b.removeAttribute('disabled');
+          b.title = '';
+        }
+      });
+
+      // If current selection is not available, pick the largest available mode (12 -> 10 -> 8)
+      if (pairsSetting > availablePairs) {
+        const fallback = [12,10,8].find(x => x <= availablePairs) ?? null;
+        if (fallback) {
+          pairsSetting = fallback;
+          modeBtns.forEach(b => b.classList.toggle('selected', parseInt(b.dataset.pairs,10) === pairsSetting));
+          renderStartBests();
+        }
+      }
+
+      // No pairs at all: disable Start
+      btnStart.disabled = availablePairs === 0;
+    }
+
+    // ===== Timer =====
+    function startTimer(){ started=true; startTime=performance.now(); raf=requestAnimationFrame(tick); }
+    function stopTimer(){ if(raf) cancelAnimationFrame(raf); raf=null; }
+    function tick(){ clock.textContent = fmt(performance.now()-startTime); raf=requestAnimationFrame(tick); }
+
+    // ===== Game build =====
+    function makeCard(text, pid, side){
+      const btn=document.createElement('button');
+      btn.className='match-card glass';
+      btn.style.cssText='position:relative;height:120px;border-radius:18px;display:grid;place-items:center;cursor:pointer;padding:12px;color:#fff;';
+      btn.dataset.pair=pid; btn.dataset.side=side;
+      btn.innerHTML=`<div class="match-card-inner" style="position:absolute;inset:0;display:grid;place-items:center;padding:12px;">
+        <div class="face" style="position:absolute;inset:0;display:grid;place-items:center;padding:12px;border-radius:18px;">${text}</div>
+      </div>`;
+      btn.addEventListener('click',()=>onPick(btn));
+      return btn;
+    }
+
+    async function buildBoard(){
+      // Reset UI + timer
+      grid.innerHTML=''; matched=0; matchedEl.textContent='0'; lock=false; first=null; stopTimer(); started=false; clock.textContent='00:00.0';
+
+      const deck = await loadActiveDeck();
+      const valid = deck.filter(c => (c.front ?? c.term) && (c.back ?? c.definition));
+      const pairsWanted = pairsSetting; // Start button already validates availability
+      const subset = shuffle(valid.slice()).slice(0, pairsWanted);
+      totalPairs = subset.length;
+
+      const pile=[];
+      subset.forEach((c,i)=>{ 
+        const id='p'+i;
+        const front = c.front ?? c.term ?? '';
+        const back  = c.back  ?? c.definition ?? '';
+        if (!front || !back) return;
+        // Two separate cards per pair
+        pile.push(makeCard(front, id, 'front'));
+        pile.push(makeCard(back,  id, 'back'));
+      });
+      shuffle(pile).forEach(el=>grid.appendChild(el));
+
+      if (window.MathJax?.typesetPromise) await MathJax.typesetPromise();
+
+      // Update "Best" on HUD and start timer
+      const list = loadBest();
+      gameBestEl.textContent = list.length ? fmt(list[0]) : '—';
+      startTimer();
+    }
+
+    // ===== Interaction =====
+    function clearPicked(el){ el.classList.remove('picked'); el.style.boxShadow=''; }
+    function markPicked(el){ el.classList.add('picked'); el.style.boxShadow='0 0 10px 4px rgba(59,130,246,0.55)'; } // blue
+
+    function onPick(el){
+      if (lock || el.classList.contains('matched') || (first && el === first)) return;
+
+      // first selection
+      if (!first) { first = el; markPicked(el); return; }
+
+      // second selection
+      const same = first.dataset.pair === el.dataset.pair;
+
+      if (same) {
+        lock = true;
+
+        // green outline flash
+        [first, el].forEach(b => {
+          b.classList.remove('picked');
+          b.style.boxShadow = '0 0 12px 4px rgba(34,197,94,0.7)';
+        });
+
+        setTimeout(() => {
+          [first, el].forEach(b => {
+            b.classList.add('matched');
+            b.style.transition = 'opacity 0.5s ease, box-shadow 0.3s ease';
+            b.style.opacity = '.25';
+            b.style.pointerEvents = 'none';
+            b.style.boxShadow = 'none';
+          });
+
+          matched++;
+          matchedEl.textContent = String(matched);
+          first = null;
+          lock = false;
+
+          if (matched === totalPairs) {
+            stopTimer();
+            const ms = performance.now() - startTime;
+            const list = loadBest(); list.push(ms); list.sort((a, b) => a - b); saveBest(list);
+            alert(`🎉 Completed ${totalPairs} pairs in ${fmt(ms)}!`);
+
+            // Return to Start screen showing updated bests
+            gameScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+            renderStartBests();
+
+            // Re-check availability in case set changed
+            getAvailablePairs().then(count => { availablePairs = count; updateModeAvailability(); });
+          }
+        }, 250); // green flash duration
+      } else {
+        // wrong pair: red flash and reset pick
+        lock = true;
+        el.style.boxShadow = '0 0 10px 4px rgba(239,68,68,0.6)';
+        first.style.boxShadow = '0 0 10px 4px rgba(239,68,68,0.6)';
+        setTimeout(() => {
+          clearPicked(first);
+          el.style.boxShadow = '';
+          first = null;
+          lock = false;
+        }, 650);
+      }
+    }
+
+    // ===== Start screen wiring =====
+    modeBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.hasAttribute('disabled')) return; // ignore unavailable modes
+        modeBtns.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        pairsSetting = parseInt(btn.dataset.pairs, 10);
+        renderStartBests();
+      });
+    });
+
+    // Start handler with availability checks + hide mode buttons during play
+    btnStart.addEventListener('click', async () => {
+      // Re-check availability right before starting (in case active set changed)
+      availablePairs = await getAvailablePairs();
+      if (pairsSetting > availablePairs) {
+        alert(`Not enough cards for ${pairsSetting} pairs. You currently have ${availablePairs} valid pairs.`);
+        updateModeAvailability();
+        return;
+      }
+      if (availablePairs === 0) {
+        alert('This study set has no valid front/back pairs. Please add cards in Manage Study Sets.');
+        updateModeAvailability();
+        return;
+      }
+
+      // swap screens
+      startScreen.classList.add('hidden');
+      gameScreen.classList.remove('hidden');
+
+      // Hide the mode selection buttons during gameplay
+      document.querySelectorAll('#matchGame .mode-btn').forEach(btn => btn.style.display = 'none');
+
+      // reflect selected mode on read-only chips (kept for debugging if made visible)
+      setModeButtonsUI();
+
+      // build and start
+      buildBoard();
+    });
+
+    // In-game restart
+    btnRestart.addEventListener('click', buildBoard);
+
+    // ===== Init: render start bests and compute availability =====
+    renderStartBests();
+    setModeButtonsUI();
+    getAvailablePairs().then(count => {
+      availablePairs = count;
+      updateModeAvailability();
+      renderStartBests(); // refresh bests in case selection changed
+    });
+  </script>
+</body>
+</html>
