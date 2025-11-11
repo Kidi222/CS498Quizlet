@@ -99,7 +99,7 @@
       }
       // Fallback: legacy JSON (kept for compatibility)
       try {
-        const resp = await fetch('flashcard.json'); // same shape {front,back}
+        const resp = await fetch('/data/flashcard.json'); // same shape {front,back}
         if (resp.ok) return await resp.json();
       } catch {}
       return [];

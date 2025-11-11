@@ -66,7 +66,7 @@
 
       // Fallback to sample file if no active set found
       console.warn('No active study set found. Falling back to flashcard.json.');
-      const response = await fetch('flashcard.json');
+      const response = await fetch('/data/flashcard.json');
       return await response.json();
     }
 
